@@ -8,42 +8,42 @@
 #include "lexer.h"
 
 
-void assertTokEof(kalei_comp::Lexer lexer)
+void assertTokEof(ckalei::Lexer lexer)
 {
     auto tok = lexer.getTok();
-    ASSERT_EQ(tok, kalei_comp::tok_def);
+    ASSERT_EQ(tok, ckalei::tok_def);
 }
 
-void assertTokDef(kalei_comp::Lexer lexer)
+void assertTokDef(ckalei::Lexer lexer)
 {
     auto tok = lexer.getTok();
-    ASSERT_EQ(tok, kalei_comp::tok_def);
+    ASSERT_EQ(tok, ckalei::tok_def);
 }
 
-void assertTokExtern(kalei_comp::Lexer lexer)
+void assertTokExtern(ckalei::Lexer lexer)
 {
     auto tok = lexer.getTok();
-    ASSERT_EQ(tok, kalei_comp::tok_extern);
+    ASSERT_EQ(tok, ckalei::tok_extern);
 }
 
-void assertTokIdentifier(kalei_comp::Lexer lexer, std::string const& expected)
+void assertTokIdentifier(ckalei::Lexer lexer, std::string const& expected)
 {
     auto tok = lexer.getTok();
-    ASSERT_EQ(tok, kalei_comp::tok_identifier);
+    ASSERT_EQ(tok, ckalei::tok_identifier);
     ASSERT_EQ(lexer.getIdentifier(), expected);
 }
 
-void assertTokNumber(kalei_comp::Lexer lexer, double expected)
+void assertTokNumber(ckalei::Lexer lexer, double expected)
 {
     auto tok = lexer.getTok();
-    ASSERT_EQ(tok, kalei_comp::tok_number);
+    ASSERT_EQ(tok, ckalei::tok_number);
     ASSERT_EQ(lexer.getNumVal(), expected);
 }
 
-void assertTokOther(kalei_comp::Lexer lexer, int expected)
+void assertTokOther(ckalei::Lexer lexer, int expected)
 {
     auto tok = lexer.getTok();
-    ASSERT_EQ(tok, kalei_comp::tok_other);
+    ASSERT_EQ(tok, ckalei::tok_other);
     ASSERT_EQ(lexer.getOtherChar(), expected);
 }
 
@@ -55,7 +55,7 @@ TEST (lexer, simple){
     FILE * file = fopen("test.txt", "w+");
     fputs(data, file);
     fseek(file, 0, SEEK_SET);
-    auto lexer = kalei_comp::Lexer(file);
+    auto lexer = ckalei::Lexer(file);
 
     assertTokDef(lexer);
     assertTokIdentifier(lexer, "id");

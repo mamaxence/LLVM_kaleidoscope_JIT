@@ -8,7 +8,7 @@
 
 #include <string>
 
-namespace kalei_comp{
+namespace ckalei{
 // tokens returned by the lexer
     enum Token{
         // token end of file

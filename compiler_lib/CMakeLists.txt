@@ -1,6 +1,6 @@
 project(compiler_lib)
 
-set(SOURCE_FILES src/lexer.cpp)
+set(SOURCE_FILES src/lexer.cpp src/parser.cpp)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 

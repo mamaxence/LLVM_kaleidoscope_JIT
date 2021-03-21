@@ -3,7 +3,7 @@
 //
 
 #include "lexer.h"
-namespace kalei_comp{
+namespace ckalei{
 
     Token Lexer::getTok()
     {
@@ -62,5 +62,5 @@ namespace kalei_comp{
         lastChar = getc(stream);
         return tok_other;
     }
-}
+} // ckalei
 
