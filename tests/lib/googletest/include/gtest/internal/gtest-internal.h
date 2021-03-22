@@ -465,7 +465,7 @@ class TestFactoryImpl : public TestFactoryBase {
 // Predicate-formatters for implementing the HRESULT checking macros
 // {ASSERT|EXPECT}_HRESULT_{SUCCEEDED|FAILED}
 // We pass a long instead of HRESULT to avoid causing an
-// include dependency for the HRESULT type.
+// fmt dependency for the HRESULT type.
 GTEST_API_ AssertionResult IsHRESULTSuccess(const char* expr,
                                             long hr);  // NOLINT
 GTEST_API_ AssertionResult IsHRESULTFailure(const char* expr,

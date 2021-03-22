@@ -4213,8 +4213,8 @@ particular type than to dump the bytes.
 
 ## Useful Mocks Created Using gMock
 
-<!--#include file="includes/g3_testing_LOGs.md"-->
-<!--#include file="includes/g3_mock_callbacks.md"-->
+<!--#fmt file="includes/g3_testing_LOGs.md"-->
+<!--#fmt file="includes/g3_mock_callbacks.md"-->
 
 ### Mock std::function {#MockFunction}
 

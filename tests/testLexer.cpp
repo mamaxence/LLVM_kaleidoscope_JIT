@@ -8,39 +8,39 @@
 #include "lexer.h"
 
 
-void assertTokEof(ckalei::Lexer lexer)
+void assertTokEof(ckalei::Lexer &lexer)
 {
     auto tok = lexer.getTok();
     ASSERT_EQ(tok, ckalei::tok_def);
 }
 
-void assertTokDef(ckalei::Lexer lexer)
+void assertTokDef(ckalei::Lexer &lexer)
 {
     auto tok = lexer.getTok();
     ASSERT_EQ(tok, ckalei::tok_def);
 }
 
-void assertTokExtern(ckalei::Lexer lexer)
+void assertTokExtern(ckalei::Lexer &lexer)
 {
     auto tok = lexer.getTok();
     ASSERT_EQ(tok, ckalei::tok_extern);
 }
 
-void assertTokIdentifier(ckalei::Lexer lexer, std::string const& expected)
+void assertTokIdentifier(ckalei::Lexer &lexer, std::string const& expected)
 {
     auto tok = lexer.getTok();
     ASSERT_EQ(tok, ckalei::tok_identifier);
     ASSERT_EQ(lexer.getIdentifier(), expected);
 }
 
-void assertTokNumber(ckalei::Lexer lexer, double expected)
+void assertTokNumber(ckalei::Lexer &lexer, double expected)
 {
     auto tok = lexer.getTok();
     ASSERT_EQ(tok, ckalei::tok_number);
     ASSERT_EQ(lexer.getNumVal(), expected);
 }
 
-void assertTokOther(ckalei::Lexer lexer, int expected)
+void assertTokOther(ckalei::Lexer &lexer, int expected)
 {
     auto tok = lexer.getTok();
     ASSERT_EQ(tok, ckalei::tok_other);
@@ -48,14 +48,11 @@ void assertTokOther(ckalei::Lexer lexer, int expected)
 }
 
 TEST (lexer, simple){
-    char * data = R""""(def id=1.2
+    auto data = R""""(def id=1.2
             # coment
             extern val
             )"""";
-    FILE * file = fopen("test.txt", "w+");
-    fputs(data, file);
-    fseek(file, 0, SEEK_SET);
-    auto lexer = ckalei::Lexer(file);
+    auto lexer = ckalei::Lexer(data);
 
     assertTokDef(lexer);
     assertTokIdentifier(lexer, "id");
@@ -63,7 +60,32 @@ TEST (lexer, simple){
     assertTokNumber(lexer, 1.2);
     assertTokExtern(lexer);
     assertTokIdentifier(lexer, "val");
-
-    fclose(file);
 }
 
+TEST (lexer, simple2){
+    auto data = R""""(
+                a = b = dd * 2
+                )"""";
+    auto lexer = ckalei::Lexer(data);
+
+    assertTokIdentifier(lexer, "a");
+    assertTokOther(lexer, '=');
+    assertTokIdentifier(lexer, "b");
+    assertTokOther(lexer, '=');
+    assertTokIdentifier(lexer, "dd");
+    assertTokOther(lexer, '*');
+    assertTokNumber(lexer, 2);
+}
+TEST (lexer, simple3){
+    auto data = R""""(
+                def mult(v1 v2)
+                )"""";
+    auto lexer = ckalei::Lexer(data);
+
+    assertTokDef(lexer);
+    assertTokIdentifier(lexer, "mult");
+    assertTokOther(lexer, '(');
+    assertTokIdentifier(lexer, "v1");
+    assertTokIdentifier(lexer, "v2");
+    assertTokOther(lexer, ')');
+}

@@ -7,6 +7,7 @@
 
 
 #include <string>
+#include <utility>
 
 namespace ckalei{
 // tokens returned by the lexer
@@ -29,7 +30,10 @@ namespace ckalei{
     // Simple lexer class
     class Lexer{
     public:
-        explicit Lexer(FILE* stream): stream(stream){};
+        explicit Lexer(std::string inputText): inputText(std::move(inputText)), lastChar(' '){
+            iteText = this->inputText.begin();
+        };
+        Lexer(const Lexer&) = delete;  // disable copy constructor because it do not copy iterator state
 
         // return the next token from standard input
         Token getTok();
@@ -39,7 +43,12 @@ namespace ckalei{
         [[nodiscard]] int getOtherChar() const{return otherChar;}
 
     private:
-        FILE * stream;
+        /// return the next char in the stream
+        int nextChar();
+        std::string inputText;
+        std::string::iterator iteText;
+        int lastChar;
+
         std::string identifierStr; // Filled if tok_identifier
         double numVal{}; // Filled if tok_number
         int otherChar{}; // Filled if tok_other

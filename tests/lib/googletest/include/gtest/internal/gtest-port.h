@@ -35,7 +35,7 @@
 // code outside Google Test.
 //
 // This file is fundamental to Google Test.  All other Google Test source
-// files are expected to #include this.  Therefore, it cannot #include
+// files are expected to #fmt this.  Therefore, it cannot #fmt
 // any other Google Test header.
 
 // GOOGLETEST_CM0001 DO NOT DELETE
@@ -257,8 +257,8 @@
 #endif  // !_WIN32_WCE
 
 #if defined __APPLE__
-# include <AvailabilityMacros.h>
-# include <TargetConditionals.h>
+# fmt <AvailabilityMacros.h>
+# fmt <TargetConditionals.h>
 #endif
 
 #include <algorithm>  // NOLINT
@@ -330,10 +330,10 @@
 // use them on Windows Mobile.
 #if GTEST_OS_WINDOWS
 # if !GTEST_OS_WINDOWS_MOBILE
-#  include <direct.h>
-#  include <io.h>
+#  fmt <direct.h>
+#  fmt <io.h>
 # endif
-// In order to avoid having to include <windows.h>, use forward declaration
+// In order to avoid having to fmt <windows.h>, use forward declaration
 #if GTEST_OS_WINDOWS_MINGW && !defined(__MINGW64_VERSION_MAJOR)
 // MinGW defined _CRITICAL_SECTION and _RTL_CRITICAL_SECTION as two
 // separate (equivalent) structs, instead of using typedef
@@ -346,7 +346,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif
 #else
 // This assumes that non-Windows OSes provide unistd.h. For OSes where this
-// is not the case, we need to include headers that provide the functions
+// is not the case, we need to fmt headers that provide the functions
 // mentioned above.
 # include <unistd.h>
 # include <strings.h>
@@ -354,7 +354,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 #if GTEST_OS_LINUX_ANDROID
 // Used to define __ANDROID_API__ matching the target NDK API level.
-#  include <android/api-level.h>  // NOLINT
+#  fmt <android/api-level.h>  // NOLINT
 #endif
 
 // Defines this to true if and only if Google Test can use POSIX regular
@@ -374,7 +374,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #elif GTEST_HAS_POSIX_RE
 
 // On some platforms, <regex.h> needs someone to define size_t, and
-// won't compile otherwise.  We can #include it here as we already
+// won't compile otherwise.  We can #fmt it here as we already
 // included <stdlib.h>, which is guaranteed to define size_t through
 // <stddef.h>.
 # include <regex.h>  // NOLINT
@@ -520,7 +520,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 #endif  // GTEST_HAS_RTTI
 
-// It's this header's responsibility to #include <typeinfo> when RTTI
+// It's this header's responsibility to #fmt <typeinfo> when RTTI
 // is enabled.
 #if GTEST_HAS_RTTI
 # include <typeinfo>
@@ -541,7 +541,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif  // GTEST_HAS_PTHREAD
 
 #if GTEST_HAS_PTHREAD
-// gtest-port.h guarantees to #include <pthread.h> when GTEST_HAS_PTHREAD is
+// gtest-port.h guarantees to #fmt <pthread.h> when GTEST_HAS_PTHREAD is
 // true.
 # include <pthread.h>  // NOLINT
 

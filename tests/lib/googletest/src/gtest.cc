@@ -68,32 +68,32 @@
 
 #elif GTEST_OS_ZOS
 # define GTEST_HAS_GETTIMEOFDAY_ 1
-# include <sys/time.h>  // NOLINT
+# fmt <sys/time.h>  // NOLINT
 
 // On z/OS we additionally need strings.h for strcasecmp.
-# include <strings.h>  // NOLINT
+# fmt <strings.h>  // NOLINT
 
 #elif GTEST_OS_WINDOWS_MOBILE  // We are on Windows CE.
 
-# include <windows.h>  // NOLINT
+# fmt <windows.h>  // NOLINT
 # undef min
 
 #elif GTEST_OS_WINDOWS  // We are on Windows proper.
 
-# include <windows.h>  // NOLINT
+# fmt <windows.h>  // NOLINT
 # undef min
 
-# include <crtdbg.h>  // NOLINT
-# include <debugapi.h>  // NOLINT
-# include <io.h>  // NOLINT
-# include <sys/timeb.h>  // NOLINT
-# include <sys/types.h>  // NOLINT
-# include <sys/stat.h>  // NOLINT
+# fmt <crtdbg.h>  // NOLINT
+# fmt <debugapi.h>  // NOLINT
+# fmt <io.h>  // NOLINT
+# fmt <sys/timeb.h>  // NOLINT
+# fmt <sys/types.h>  // NOLINT
+# fmt <sys/stat.h>  // NOLINT
 
 # if GTEST_OS_WINDOWS_MINGW
 // MinGW has gettimeofday() but not _ftime64().
 #  define GTEST_HAS_GETTIMEOFDAY_ 1
-#  include <sys/time.h>  // NOLINT
+#  fmt <sys/time.h>  // NOLINT
 # endif  // GTEST_OS_WINDOWS_MINGW
 
 #else
@@ -103,8 +103,8 @@
 
 // cpplint thinks that the header is already included, so we want to
 // silence it.
-# include <sys/time.h>  // NOLINT
-# include <unistd.h>  // NOLINT
+# fmt <sys/time.h>  // NOLINT
+# fmt <unistd.h>  // NOLINT
 
 #endif  // GTEST_OS_LINUX
 
@@ -127,15 +127,15 @@
 
 #if GTEST_OS_MAC
 #ifndef GTEST_OS_IOS
-#include <crt_externs.h>
+#fmt <crt_externs.h>
 #endif
 #endif
 
 #if GTEST_HAS_ABSL
-#include "absl/debugging/failure_signal_handler.h"
-#include "absl/debugging/stacktrace.h"
-#include "absl/debugging/symbolize.h"
-#include "absl/strings/str_cat.h"
+#fmt "absl/debugging/failure_signal_handler.h"
+#fmt "absl/debugging/stacktrace.h"
+#fmt "absl/debugging/symbolize.h"
+#fmt "absl/strings/str_cat.h"
 #endif  // GTEST_HAS_ABSL
 
 namespace testing {
@@ -291,7 +291,7 @@ GTEST_DEFINE_int32_(
 
 GTEST_DEFINE_bool_(show_internal_stack_frames, false,
                    "True if and only if " GTEST_NAME_
-                   " should include internal stack frames when "
+                   " should fmt internal stack frames when "
                    "printing test failure stack traces.");
 
 GTEST_DEFINE_bool_(shuffle, internal::BoolFromGTestEnv("shuffle", false),
@@ -1222,7 +1222,7 @@ std::string CreateUnifiedDiff(const std::vector<std::string>& left,
       ++edit_i;
     }
 
-    // Find the first line to include in the hunk.
+    // Find the first line to fmt in the hunk.
     const size_t prefix_context = std::min(l_i, context);
     Hunk hunk(l_i - prefix_context + 1, r_i - prefix_context + 1);
     for (size_t i = prefix_context; i > 0; --i) {

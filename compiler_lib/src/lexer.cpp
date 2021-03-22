@@ -7,11 +7,10 @@ namespace ckalei{
 
     Token Lexer::getTok()
     {
-        static int lastChar = ' ';
 
         // skip whitespace
         while (isspace(lastChar)){
-            lastChar = getc(stream);
+            lastChar = nextChar();
         }
 
         // parse identifier (token starting with alpha num)
@@ -19,7 +18,7 @@ namespace ckalei{
             identifierStr = "";
             identifierStr += lastChar;
 
-            while (isalnum(lastChar = getc(stream))){
+            while (isalnum(lastChar = nextChar())){
                 identifierStr += lastChar;
             }
 
@@ -37,7 +36,7 @@ namespace ckalei{
             std::string numStr;
             do {
                 numStr += lastChar;
-                lastChar = getc(stream);
+                lastChar = nextChar();
             } while (isdigit(lastChar) || lastChar == '.');
             numVal = strtod(numStr.c_str(), nullptr);
             return tok_number;
@@ -46,7 +45,7 @@ namespace ckalei{
         // parse comment
         if (lastChar == '#'){
             do {
-                lastChar = getc(stream);
+                lastChar = nextChar();
             } while (lastChar != '\n' && lastChar != EOF && lastChar != '\r');
 
             if (lastChar != EOF){
@@ -59,8 +58,16 @@ namespace ckalei{
         }
 
         otherChar = lastChar;
-        lastChar = getc(stream);
+        lastChar = nextChar();
         return tok_other;
+    }
+
+    int Lexer::nextChar()
+    {
+        if (iteText != inputText.end()){
+            return *(iteText++);
+        }
+        return EOF;
     }
 } // ckalei
 
