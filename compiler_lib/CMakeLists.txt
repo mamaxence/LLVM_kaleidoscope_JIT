@@ -1,6 +1,6 @@
 project(compiler_lib)
 
-set(SOURCE_FILES src/lexer.cpp src/parser.cpp src/visitor.cpp src/ast.cpp)
+set(SOURCE_FILES src/lexer.cpp src/parser.cpp src/ppvisitor.cpp src/ast.cpp)
 
 # use fmt lib
 set(FMT_SOURCE external/fmt-7.1.3/src/format.cc)
