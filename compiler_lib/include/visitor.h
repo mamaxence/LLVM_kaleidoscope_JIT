@@ -6,8 +6,13 @@
 #define LLVM_KALEIDOSCOPE_VISITOR_H
 
 #include <iostream>
+#include <map>
+
 
 #include "ast.h"
+#include "llvm/IR/Value.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/IRBuilder.h"
 
 namespace ckalei{
 
@@ -26,6 +31,30 @@ namespace ckalei{
         virtual void visit(const CallExprAST& node) = 0;
         virtual void visit(const PrototypeAST& node) = 0;
         virtual void visit(const FunctionAST& node) = 0;
+    };
+
+    class CodeGenVisitor: public Visitor{
+
+    public:
+        void visit(const NumberExprAST& node) override;
+        void visit(const VariableExprAST& node) override;
+        void visit(const BinaryExprAST& node) override;
+        void visit(const CallExprAST& node) override;
+        void visit(const PrototypeAST& node) override;
+        void visit(const FunctionAST& node) override;
+
+    private:
+        llvm::Value* logErrorV(const char* str){
+            fprintf(stderr, "LogError: %s\n", str);
+            return nullptr;
+        }
+
+        llvm::Value lastValue;
+        llvm::LLVMContext context;
+        llvm::IRBuilder<> builder;
+        std::unique_ptr<llvm::Module> module;
+        std::map<std::string, llvm::Value *> namedValues;
+
     };
 
     /// Visitor for producing prety print of ast
