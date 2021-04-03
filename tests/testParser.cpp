@@ -5,6 +5,7 @@
 #include <sys/mman.h>
 #include "gtest/gtest.h"
 #include "parser.h"
+#include "program.h"
 
 #include "visitor.h"
 
@@ -37,7 +38,9 @@ TEST (parser, simple_addition){
     )
 )
 )"""";
-    testParser(data, expected);
+
+    auto program = ckalei::Program(data);
+    ASSERT_EQ(program.ppformat(), expected);
 }
 
 TEST (parser, simple_multiplication){
@@ -55,7 +58,8 @@ TEST (parser, simple_multiplication){
     )
 )
 )"""";
-    testParser(data, expected);
+    auto program = ckalei::Program(data);
+    ASSERT_EQ(program.ppformat(), expected);
 }
 /// Test a complex binary operation with parenthesis support
 TEST (parser, combined_opperation){
@@ -85,7 +89,8 @@ TEST (parser, combined_opperation){
     )
 )
 )"""";
-    testParser(data, expected);
+    auto program = ckalei::Program(data);
+    ASSERT_EQ(program.ppformat(), expected);
 }
 
 
@@ -107,7 +112,8 @@ TEST (parser, function_definition){
     )
 )
 )"""";
-    testParser(data, expected);
+    auto program = ckalei::Program(data);
+    ASSERT_EQ(program.ppformat(), expected);
 }
 
 TEST (parser, externdef){
@@ -120,8 +126,8 @@ TEST (parser, externdef){
     v2
 )
 )"""";
-    testParser(data, expected);
-
+    auto program = ckalei::Program(data);
+    ASSERT_EQ(program.ppformat(), expected);
 }
 
 TEST (parser, callexpr){
@@ -142,8 +148,8 @@ TEST (parser, callexpr){
     )
 )
 )"""";
-    testParser(data, expected);
-
+    auto program = ckalei::Program(data);
+    ASSERT_EQ(program.ppformat(), expected);
 }
 
 //TEST (parser, variable_assignation){

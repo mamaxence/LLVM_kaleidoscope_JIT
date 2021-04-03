@@ -5,7 +5,7 @@ enable_testing()
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp compiler_lib/include/program.h)
 
 add_subdirectory(compiler_lib)
 target_link_libraries(${PROJECT_NAME} compiler_lib)
