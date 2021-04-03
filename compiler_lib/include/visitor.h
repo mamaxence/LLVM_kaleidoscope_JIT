@@ -13,9 +13,12 @@
 #include "llvm/IR/Value.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/Verifier.h"
 
 namespace ckalei{
 
+    class ASTNode;
     class NumberExprAST;
     class VariableExprAST;
     class BinaryExprAST;
@@ -25,35 +28,42 @@ namespace ckalei{
 
     class Visitor{
     public:
-        virtual void visit(const NumberExprAST& node) = 0;
-        virtual void visit(const VariableExprAST& node) = 0;
-        virtual void visit(const BinaryExprAST& node) = 0;
-        virtual void visit(const CallExprAST& node) = 0;
-        virtual void visit(const PrototypeAST& node) = 0;
-        virtual void visit(const FunctionAST& node) = 0;
+        virtual void visit(NumberExprAST& node) = 0;
+        virtual void visit(VariableExprAST& node) = 0;
+        virtual void visit(BinaryExprAST& node) = 0;
+        virtual void visit(CallExprAST& node) = 0;
+        virtual void visit(PrototypeAST& node) = 0;
+        virtual void visit(FunctionAST& node) = 0;
     };
 
     class CodeGenVisitor: public Visitor{
 
     public:
-        void visit(const NumberExprAST& node) override;
-        void visit(const VariableExprAST& node) override;
-        void visit(const BinaryExprAST& node) override;
-        void visit(const CallExprAST& node) override;
-        void visit(const PrototypeAST& node) override;
-        void visit(const FunctionAST& node) override;
+        /// Generate code for NumberExpr. Set lastValue.
+        void visit(NumberExprAST& node) override;
+        /// Generate code for VariableExpr. Set lastValue.
+        void visit(VariableExprAST& node) override;
+        /// Generate code for Binary expression. Set lastValue.
+        void visit(BinaryExprAST& node) override;
+        /// Generate code for CallExpr AST. Set lastValue.
+        void visit(CallExprAST& node) override;
+        /// Generate code for Prototype node. Set lastFunction.
+        void visit(PrototypeAST& node) override;
+        void visit(FunctionAST& node) override;
 
     private:
+        /// Log an error durring code creation
         llvm::Value* logErrorV(const char* str){
             fprintf(stderr, "LogError: %s\n", str);
             return nullptr;
         }
 
-        llvm::Value lastValue;
+        llvm::Value* lastValue; // Contain the last value if defined
+        llvm::Function* lastFunction; // Contain the last function if defined
         llvm::LLVMContext context;
         llvm::IRBuilder<> builder;
         std::unique_ptr<llvm::Module> module;
-        std::map<std::string, llvm::Value *> namedValues;
+        std::map<llvm::StringRef, llvm::Value *> namedValues;
 
     };
 
@@ -65,33 +75,33 @@ namespace ckalei{
 
         /// Pretty print NumberExpr:
         /// NumberExpr($val)
-        void visit(const NumberExprAST& node) override;
+        void visit(NumberExprAST& node) override;
         /// Pretty print VariableExpr
         /// VariableExpr($varname)
-        void visit(const VariableExprAST& node) override;
+        void visit(VariableExprAST& node) override;
         /// Pretty print BinaryExpr
         /// BinaryExpr(
         ///     $leftOp
         ///     $op
         ///     $rightOp
         /// )
-        void visit(const BinaryExprAST& node) override;
+        void visit(BinaryExprAST& node) override;
         /// Pretty print CallExpr
         /// CallExpr($callee(
         ///     $args*
         /// )
-        void visit(const CallExprAST& node) override;
+        void visit(CallExprAST& node) override;
         /// Pretty print Prototype
         /// Prototype($name(
         ///     $args*
         /// )
-        void visit(const PrototypeAST& node) override;
+        void visit(PrototypeAST& node) override;
         /// Pretty print Function
         /// Function(
         ///     $prototype
         ///     $expr
         /// )
-        void visit(const FunctionAST& node) override;
+        void visit(FunctionAST& node) override;
 
         [[nodiscard]] const std::string &getStr() const;
 

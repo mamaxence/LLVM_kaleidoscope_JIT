@@ -10,18 +10,18 @@
 
 namespace ckalei{
 
-    void PPrintorVisitor::visit(const NumberExprAST &node)
+    void PPrintorVisitor::visit(NumberExprAST &node)
     {
         str += fmt::format(getLinePrefix() + "NumberExpr({})\n", node.getVal());
     }
 
 
-    void PPrintorVisitor::visit(const VariableExprAST &node)
+    void PPrintorVisitor::visit(VariableExprAST &node)
     {
         str += fmt::format(getLinePrefix() + "VariableExpr({})\n", node.getName());
     }
 
-    void PPrintorVisitor::visit(const BinaryExprAST &node)
+    void PPrintorVisitor::visit(BinaryExprAST &node)
     {
         str += getLinePrefix() + "BinaryExpr(\n";
         inc++;
@@ -32,7 +32,7 @@ namespace ckalei{
         str += getLinePrefix() + ")\n";
     }
 
-    void PPrintorVisitor::visit(const CallExprAST &node)
+    void PPrintorVisitor::visit(CallExprAST &node)
     {
         str += fmt::format(getLinePrefix() + "CallExpr({}(\n",node.getCallee());
 
@@ -45,7 +45,7 @@ namespace ckalei{
         str += getLinePrefix() + ")\n";
     }
 
-    void PPrintorVisitor::visit(const PrototypeAST &node)
+    void PPrintorVisitor::visit(PrototypeAST &node)
     {
         str += fmt::format(getLinePrefix() + "Prototype({}(\n",node.getName());
 
@@ -58,7 +58,7 @@ namespace ckalei{
         str += getLinePrefix() + ")\n";
     }
 
-    void PPrintorVisitor::visit(const FunctionAST &node)
+    void PPrintorVisitor::visit(FunctionAST &node)
     {
         str += getLinePrefix() + "Function(\n";
         inc++;
