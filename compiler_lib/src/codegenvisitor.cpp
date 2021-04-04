@@ -8,7 +8,7 @@ namespace ckalei{
 
     void CodeGenVisitor::visit(NumberExprAST &node)
     {
-        lastValue = llvm::ConstantFP::get(context, llvm::APFloat(node.getVal()));
+        lastValue = llvm::ConstantFP::get(*context, llvm::APFloat(node.getVal()));
     }
 
     void CodeGenVisitor::visit(VariableExprAST &node)
@@ -34,15 +34,19 @@ namespace ckalei{
 
         switch (node.getOp()) {
             case '+':
-                lastValue = builder.CreateFAdd(lv, rv, "addtmp");
+                lastValue = builder->CreateFAdd(lv, rv, "addtmp");
+                return;
             case '-':
-                lastValue = builder.CreateFSub(lv, rv, "subtmp");
+                lastValue = builder->CreateFSub(lv, rv, "subtmp");
+                return;
             case '*':
-                lastValue = builder.CreateFMul(lv, rv, "multmp");
+                lastValue = builder->CreateFMul(lv, rv, "multmp");
+                return;
             case '<':
-                lv = builder.CreateFCmpULT(lv, rv, "cmptmp");
+                lv = builder->CreateFCmpULT(lv, rv, "cmptmp");
                 // convert bool 0/1 to double 0.0 or 1.0
-                lastValue = builder.CreateUIToFP(lv, llvm::Type::getDoubleTy(context), "booltmp");
+                lastValue = builder->CreateUIToFP(lv, llvm::Type::getDoubleTy(*context), "booltmp");
+                return;
             default:
                 lastValue = logErrorV("invalid binary operator");
         }
@@ -70,13 +74,13 @@ namespace ckalei{
             argsVals.push_back(lastValue);
         }
 
-        lastValue = builder.CreateCall(calleeF, argsVals, "calltmp");
+        lastValue = builder->CreateCall(calleeF, argsVals, "calltmp");
     }
 
     void CodeGenVisitor::visit(PrototypeAST &node)
     {
-        std::vector<llvm::Type *> argsTypes(node.getArgs().size(), llvm::Type::getDoubleTy(context));
-        auto signature = llvm::FunctionType::get(llvm::Type::getDoubleTy(context), argsTypes, false);
+        std::vector<llvm::Type *> argsTypes(node.getArgs().size(), llvm::Type::getDoubleTy(*context));
+        auto signature = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), argsTypes, false);
 
         auto func = llvm::Function::Create(signature,
                                               llvm::Function::ExternalLinkage,
@@ -106,11 +110,12 @@ namespace ckalei{
 
         if (!function->empty()){
             lastFunction = (llvm::Function*) logErrorV("Function can not be redefined");
+            return;
         }
 
         // Create the block for the function
-        llvm::BasicBlock *bb = llvm::BasicBlock::Create(context, "entry", function);
-        builder.SetInsertPoint(bb);
+        llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, "entry", function);
+        builder->SetInsertPoint(bb);
 
         // Create a nue named value table containing functions args
         namedValues.clear();
@@ -121,9 +126,10 @@ namespace ckalei{
         node.getBody()->accept(*this);
         auto retVal =  lastValue;
         if (retVal){
-            builder.CreateRet(retVal);
+            builder->CreateRet(retVal);
             llvm::verifyFunction(*function);
             lastFunction = function;
+            return;
         }
         function->eraseFromParent();
         lastFunction = nullptr;

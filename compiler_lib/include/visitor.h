@@ -39,6 +39,11 @@ namespace ckalei{
     class CodeGenVisitor: public Visitor{
 
     public:
+        CodeGenVisitor(){
+            context = std::make_unique<llvm::LLVMContext>();
+            module = std::make_unique<llvm::Module>("jit", *context);
+            builder = std::make_unique<llvm::IRBuilder<>>(*context);
+        }
         /// Generate code for NumberExpr. Set lastValue.
         void visit(NumberExprAST& node) override;
         /// Generate code for VariableExpr. Set lastValue.
@@ -49,7 +54,19 @@ namespace ckalei{
         void visit(CallExprAST& node) override;
         /// Generate code for Prototype node. Set lastFunction.
         void visit(PrototypeAST& node) override;
+        /// Generate code for Function node. Set lastFunction.
         void visit(FunctionAST& node) override;
+
+    public:
+        std::string ppformat(){
+            if (!lastFunction){
+                return "Error during compilation\n";
+            }
+            std::string str;
+            auto stream = llvm::raw_string_ostream(str);
+            lastFunction->print(stream);
+            return str;
+        }
 
     private:
         /// Log an error durring code creation
@@ -60,8 +77,8 @@ namespace ckalei{
 
         llvm::Value* lastValue; // Contain the last value if defined
         llvm::Function* lastFunction; // Contain the last function if defined
-        llvm::LLVMContext context;
-        llvm::IRBuilder<> builder;
+        std::unique_ptr<llvm::LLVMContext> context;
+        std::unique_ptr<llvm::IRBuilder<>> builder;
         std::unique_ptr<llvm::Module> module;
         std::map<llvm::StringRef, llvm::Value *> namedValues;
 

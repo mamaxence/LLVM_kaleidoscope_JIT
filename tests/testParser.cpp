@@ -2,26 +2,10 @@
 // Created by maxence on 21/03/2021.
 //
 
-#include <sys/mman.h>
 #include "gtest/gtest.h"
-#include "parser.h"
 #include "program.h"
 
-#include "visitor.h"
 
-void testParser(const std::string& data, const std::string& expected){
-    auto lexer = std::make_unique<ckalei::Lexer>(data);
-    auto parser = ckalei::Parser(std::move(lexer));
-
-    auto res = parser.getAstNodes();
-    auto pprinter = ckalei::PPrintorVisitor();
-    for (auto const& node: res){
-        ASSERT_NE(node, nullptr);
-        node->accept(pprinter);
-    }
-    std::cout << pprinter.getStr();
-    ASSERT_EQ(pprinter.getStr(), expected);
-}
 
 TEST (parser, simple_addition){
     auto data = R""""(

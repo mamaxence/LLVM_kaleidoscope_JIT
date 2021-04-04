@@ -18,13 +18,14 @@ namespace ckalei{
         Program(const std::string& rawCode): rawCode(rawCode){
             auto lexer = std::make_unique<Lexer>(rawCode);
             parser = std::make_unique<Parser>(std::move(lexer));
-            ast_data = parser->getAstNodes();
+            astData = parser->getAstNodes();
         };
 
         /// Return a pprinted representation of the program
-        [[nodiscard]] std::string ppformat() const{
+        [[nodiscard]] std::string ppformat() const
+        {
             auto pprinter = ckalei::PPrintorVisitor();
-            for (auto const& node: ast_data){
+            for (auto const& node: astData){
                 if (node != nullptr){
                     node->accept(pprinter);
                 }
@@ -32,11 +33,23 @@ namespace ckalei{
             return pprinter.getStr();
         }
 
+        [[nodiscard]] std::string getAssembly() const
+        {
+            auto compiler = CodeGenVisitor();
+            std::string res;
+            for (auto const& node: astData){
+                if (node != nullptr){
+                    node->accept(compiler);
+                    res += compiler.ppformat();
+                }
+            }
+            return res;
+        }
 
     private:
         std::string rawCode;
         std::unique_ptr<Parser> parser;
-        std::vector<std::unique_ptr<ASTNode>> ast_data;
+        std::vector<std::unique_ptr<ASTNode>> astData;
     };
 } // ckalei
 
