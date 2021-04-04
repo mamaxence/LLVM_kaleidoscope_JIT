@@ -119,8 +119,8 @@ namespace ckalei{
 
         // Create a nue named value table containing functions args
         namedValues.clear();
-        for (auto &arg: function->args()){
-            namedValues[arg.getName()] = &arg;
+        for (int i=0; i<function->arg_size(); i++){
+            namedValues[node.getProto()->getArgs()[i]] = function->getArg(i);
         }
 
         node.getBody()->accept(*this);

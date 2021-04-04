@@ -136,6 +136,36 @@ TEST (parser, callexpr){
     ASSERT_EQ(program.ppformat(), expected);
 }
 
+
+TEST (parser, extern_def){
+    auto data = R""""(
+    extern foo(a);
+    def foo(b) b;
+    foo(1);
+                )"""";
+    auto expected =
+            R""""(Prototype(foo(
+    a
+)
+Function(
+    Prototype(foo(
+        b
+    )
+    VariableExpr(b)
+)
+Function(
+    Prototype((
+    )
+    CallExpr(foo(
+        NumberExpr(1)
+    )
+)
+)"""";
+    auto program = ckalei::Program(data);
+    std::cout << program.getAssembly();
+    ASSERT_EQ(program.ppformat(), expected);
+}
+
 //TEST (parser, variable_assignation){
 //    auto data = R""""(
 //                a = b = dd * 2
