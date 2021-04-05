@@ -6,14 +6,13 @@
 #include "program.h"
 
 
-
 TEST (parser, simple_addition){
     auto data = R""""(
-                1 + 2
+                1 + 2;
                 )"""";
     auto expected =
             R""""(Function(
-    Prototype((
+    Prototype(__anon_expr(
     )
     BinaryExpr(
         NumberExpr(1)
@@ -33,7 +32,7 @@ TEST (parser, simple_multiplication){
                 )"""";
     auto expected =
             R""""(Function(
-    Prototype((
+    Prototype(__anon_expr(
     )
     BinaryExpr(
         NumberExpr(1)
@@ -43,6 +42,7 @@ TEST (parser, simple_multiplication){
 )
 )"""";
     auto program = ckalei::Program(data);
+    auto res = *program.evaluate();
     ASSERT_EQ(program.ppformat(), expected);
 }
 /// Test a complex binary operation with parenthesis support
@@ -52,7 +52,7 @@ TEST (parser, combined_opperation){
                 )"""";
     auto expected =
             R""""(Function(
-    Prototype((
+    Prototype(__anon_expr(
     )
     BinaryExpr(
         BinaryExpr(
@@ -120,7 +120,7 @@ TEST (parser, callexpr){
                 )"""";
     auto expected =
             R""""(Function(
-    Prototype((
+    Prototype(__anon_expr(
     )
     CallExpr(mult(
         BinaryExpr(
@@ -154,7 +154,7 @@ Function(
     VariableExpr(b)
 )
 Function(
-    Prototype((
+    Prototype(__anon_expr(
     )
     CallExpr(foo(
         NumberExpr(1)
@@ -162,37 +162,41 @@ Function(
 )
 )"""";
     auto program = ckalei::Program(data);
-    std::cout << program.getAssembly();
     ASSERT_EQ(program.ppformat(), expected);
 }
 
-//TEST (parser, variable_assignation){
-//    auto data = R""""(
-//                a = b = dd * 2
-//                )"""";
-//    auto expected =
-//            R""""(Function(
-//    Prototype((
-//    )
-//    BinaryExpr(
-//        BinaryExpr(
-//            NumberExpr(1)
-//            +
-//            BinaryExpr(
-//                VariableExpr(a)
-//                *
-//                BinaryExpr(
-//                    NumberExpr(2)
-//                    -
-//                    NumberExpr(4)
-//                )
-//            )
-//        )
-//        -
-//        VariableExpr(b)
-//    )
-//)
-//)"""";
-//    testParser(data, expected);
-//}
-//
+TEST (parser, recursive_call){
+    auto data = R""""(
+    add(mult(2 3) 1)
+    (1+(3*2))
+                )"""";
+    auto expected =
+            R""""(Function(
+    Prototype(__anon_expr(
+    )
+    CallExpr(add(
+        CallExpr(mult(
+            NumberExpr(2)
+            NumberExpr(3)
+        )
+        NumberExpr(1)
+    )
+)
+Function(
+    Prototype(__anon_expr(
+    )
+    BinaryExpr(
+        NumberExpr(1)
+        +
+        BinaryExpr(
+            NumberExpr(3)
+            *
+            NumberExpr(2)
+        )
+    )
+)
+)"""";
+    auto program = ckalei::Program(data);
+    std::cout << program.ppformat();
+    ASSERT_EQ(program.ppformat(), expected);
+}

@@ -13,6 +13,8 @@
 
 namespace ckalei {
 
+    const std::string ANONIMOUS_EXPR = "__anon_expr";
+
     class Parser {
     public:
         Parser(std::unique_ptr<Lexer> lexer) : lexer(std::move(lexer)), binopPrec(std::map<char, int>())
@@ -40,7 +42,7 @@ namespace ckalei {
                 return nullptr;
             }
             return std::make_unique<FunctionAST>(
-                    std::make_unique<PrototypeAST>("", std::vector<std::string>()),
+                    std::make_unique<PrototypeAST>(ANONIMOUS_EXPR, std::vector<std::string>()),
                     std::move(expr)
             );
         }

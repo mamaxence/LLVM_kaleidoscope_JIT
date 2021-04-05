@@ -94,6 +94,7 @@ namespace ckalei {
     class PrototypeAST: public ASTNode{
     public:
         PrototypeAST(std::string name, std::vector<std::string> args): name(std::move(name)), args(std::move(args)) {};
+        PrototypeAST(const PrototypeAST& other): name(other.getName()), args(other.getArgs())  {};
 
         void accept(Visitor& visitor);
         const std::string &getName() const {return name;}

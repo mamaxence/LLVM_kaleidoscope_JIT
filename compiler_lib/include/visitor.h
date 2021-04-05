@@ -10,11 +10,19 @@
 
 
 #include "ast.h"
+
 #include "llvm/IR/Value.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/IR/LegacyPassManager.h"
+
+#include "llvm/Transforms/InstCombine/InstCombine.h"
+#include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Scalar/GVN.h"
+
+#include "KaleidoscopeJIT.h"
 
 namespace ckalei{
 
@@ -36,14 +44,11 @@ namespace ckalei{
         virtual void visit(FunctionAST& node) = 0;
     };
 
+    /// Visitor for code generation
     class CodeGenVisitor: public Visitor{
 
     public:
-        CodeGenVisitor(){
-            context = std::make_unique<llvm::LLVMContext>();
-            module = std::make_unique<llvm::Module>("jit", *context);
-            builder = std::make_unique<llvm::IRBuilder<>>(*context);
-        }
+        CodeGenVisitor();
         /// Generate code for NumberExpr. Set lastValue.
         void visit(NumberExprAST& node) override;
         /// Generate code for VariableExpr. Set lastValue.
@@ -58,30 +63,47 @@ namespace ckalei{
         void visit(FunctionAST& node) override;
 
     public:
-        std::string ppformat(){
-            if (!lastFunction){
-                return "Error during compilation\n";
-            }
-            std::string str;
-            auto stream = llvm::raw_string_ostream(str);
-            lastFunction->print(stream);
-            return str;
-        }
+        /// Return assembly transcript of the astData
+        [[nodiscard]] std::string getAssembly(const std::vector<std::unique_ptr<ASTNode>>& astData);
+        /// Return an evaluation of the current node. Valid only if current node is an expression
+        std::unique_ptr<std::vector<double>> evaluate(const std::vector<std::unique_ptr<ASTNode>>& astData);
 
     private:
+        /// Return computed assembly code for lastFunc
+        [[nodiscard]] std::string ppformat() const;
+        /// Top level handling of top level expression
+        void handleTopLevelExpression(FunctionAST& node);
+        /// Top level handling of function definition
+        void handleTopLevelDefinition(FunctionAST& node);
+        /// Top level handling of extern declaration
+        void handleTopLevelExtern(PrototypeAST& node);
+        /// Search for the Function IR for the given name. First search in the current module, then in the declared
+        /// functionProto map. It not found, return nullptr.
+        llvm::Function *getFunction(const std::string& name);
+
         /// Log an error durring code creation
         llvm::Value* logErrorV(const char* str){
             fprintf(stderr, "LogError: %s\n", str);
             return nullptr;
         }
+        /// Initialise a new module and its associated context and pass manager. To be called after each expression
+        /// Creation
+        void initModuleAndPassManager();
 
-        llvm::Value* lastValue; // Contain the last value if defined
-        llvm::Function* lastFunction; // Contain the last function if defined
+        std::unique_ptr<llvm::orc::KaleidoscopeJIT> jit;
+
+        llvm::Value* lastValue{}; // Contain the last value if defined
+        llvm::Function* lastFunction{}; // Contain the last function if defined
         std::unique_ptr<llvm::LLVMContext> context;
         std::unique_ptr<llvm::IRBuilder<>> builder;
         std::unique_ptr<llvm::Module> module;
-        std::map<llvm::StringRef, llvm::Value *> namedValues;
+        std::map<llvm::StringRef, llvm::Value *> namedValues; // Contain reference to named values in context
+        std::map<std::string, std::unique_ptr<PrototypeAST>> functionProtos;
 
+        std::unique_ptr<llvm::legacy::FunctionPassManager> passManager;
+        std::unique_ptr<std::vector<double>> evaluationRes;
+
+        bool jitTopLevel;
     };
 
     /// Visitor for producing prety print of ast

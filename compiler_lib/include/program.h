@@ -11,14 +11,25 @@
 
 #include "parser.h"
 
+#include "llvm/Support/TargetSelect.h"
+
+
 namespace ckalei{
+
+
 
     class Program{
     public:
         Program(const std::string& rawCode): rawCode(rawCode){
+
+            llvm::InitializeNativeTarget();
+            llvm::InitializeNativeTargetAsmPrinter();
+            llvm::InitializeNativeTargetAsmParser();
+
             auto lexer = std::make_unique<Lexer>(rawCode);
             parser = std::make_unique<Parser>(std::move(lexer));
             astData = parser->getAstNodes();
+
         };
 
         /// Return a pprinted representation of the program
@@ -33,23 +44,26 @@ namespace ckalei{
             return pprinter.getStr();
         }
 
+        /// Return a string containing assembly representation of the ast
         [[nodiscard]] std::string getAssembly() const
         {
             auto compiler = CodeGenVisitor();
-            std::string res;
-            for (auto const& node: astData){
-                if (node != nullptr){
-                    node->accept(compiler);
-                    res += compiler.ppformat();
-                }
-            }
-            return res;
+            return compiler.getAssembly(astData);
         }
+
+        /// Return a list of double containing the evaluation of the program
+        [[nodiscard]] std::unique_ptr<std::vector<double>> evaluate() const
+        {
+            auto compiler = CodeGenVisitor();
+            return std::move(compiler.evaluate(astData));
+        };
+
 
     private:
         std::string rawCode;
         std::unique_ptr<Parser> parser;
         std::vector<std::unique_ptr<ASTNode>> astData;
+
     };
 } // ckalei
 

@@ -37,17 +37,17 @@ namespace ckalei {
         auto idName = lexer->getIdentifier();
         getNextToken();
 
-        if (lexer->getOtherChar() != '('){ // this is not an function call
+        if (curTok!= tok_other || lexer->getOtherChar() != '('){ // this is not an function call
             return std::make_unique<VariableExprAST>(idName);
         }
 
         // this is a function call
         getNextToken(); // eat (
         auto args = std::vector<std::unique_ptr<ExprAST>>();
-        while (lexer->getOtherChar() != ')'){
+        while (curTok != tok_other || lexer->getOtherChar() != ')'){
             args.push_back(parseExpr());
         }
-        if (lexer->getOtherChar() != ')'){
+        if (curTok != tok_other || lexer->getOtherChar() != ')'){
             return logError("expected ')'");
         }
         getNextToken(); // eat )

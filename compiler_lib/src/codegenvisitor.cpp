@@ -3,8 +3,27 @@
 //
 
 #include "visitor.h"
+#include "llvm/Support/Error.h"
+#include "llvm/Support/ErrorHandling.h"
 
 namespace ckalei{
+
+    CodeGenVisitor::CodeGenVisitor(): jitTopLevel(false)
+    {
+        jit = std::make_unique<llvm::orc::KaleidoscopeJIT>();
+        initModuleAndPassManager();
+    }
+
+    std::string CodeGenVisitor::ppformat() const
+    {
+        if (!lastFunction){
+            return "Error during compilation\n";
+        }
+        std::string str;
+        auto stream = llvm::raw_string_ostream(str);
+        lastFunction->print(stream);
+        return str;
+    }
 
     void CodeGenVisitor::visit(NumberExprAST &node)
     {
@@ -54,7 +73,7 @@ namespace ckalei{
 
     void CodeGenVisitor::visit(CallExprAST &node)
     {
-        llvm::Function *calleeF = module->getFunction(node.getCallee());
+        llvm::Function *calleeF = getFunction(node.getCallee());
         if (!calleeF){
             lastValue = logErrorV("Function not found");
             return;
@@ -79,6 +98,10 @@ namespace ckalei{
 
     void CodeGenVisitor::visit(PrototypeAST &node)
     {
+        if (jitTopLevel){
+            handleTopLevelExtern(node);
+            return;
+        }
         std::vector<llvm::Type *> argsTypes(node.getArgs().size(), llvm::Type::getDoubleTy(*context));
         auto signature = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), argsTypes, false);
 
@@ -96,22 +119,18 @@ namespace ckalei{
 
     void CodeGenVisitor::visit(FunctionAST &node)
     {
-        // Check if function name is already declared
-        llvm::Function* function = module->getFunction(node.getProto()->getName());
-        if (!function){ // if it is not set, get the proto by parsing the declared prototype
-            node.getProto()->accept(*this);
-            function = lastFunction;
-        }
-
-        if (!function){ // if no prototype, an error occured
-            lastFunction = nullptr;
+        // Handle jit top level
+        if (jitTopLevel && node.getProto()->getName() == "__anon_expr"){
+            handleTopLevelExpression(node);
+            return;
+        }else if(jitTopLevel){
+            handleTopLevelDefinition(node);
             return;
         }
 
-        if (!function->empty()){
-            lastFunction = (llvm::Function*) logErrorV("Function can not be redefined");
-            return;
-        }
+        PrototypeAST& p = *(node.getProto());
+        functionProtos[node.getProto()->getName()] = std::make_unique<PrototypeAST>(p);
+        auto function = getFunction(p.getName());
 
         // Create the block for the function
         llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, "entry", function);
@@ -128,10 +147,106 @@ namespace ckalei{
         if (retVal){
             builder->CreateRet(retVal);
             llvm::verifyFunction(*function);
+            passManager->run(*function);
             lastFunction = function;
             return;
         }
-        function->eraseFromParent();
         lastFunction = nullptr;
+    }
+
+    void CodeGenVisitor::handleTopLevelExpression(FunctionAST &node)
+    {
+        jitTopLevel = false;
+        node.accept(*this);
+        if (!lastFunction){
+            return;
+        }
+
+        jit->addModule(std::move(module));
+        initModuleAndPassManager();
+
+        auto exprSymbol = jit->findSymbol("__anon_expr");
+        assert(exprSymbol && "Function not found");
+
+        auto adrr = exprSymbol.getAddress();
+        if (!adrr){
+            llvm::handleAllErrors(adrr.takeError());
+            return;
+        }
+        double (*fp)() = (double (*)()) (intptr_t) exprSymbol.getAddress().get();
+        double val = fp();
+        fprintf(stderr, "Evaluated to %f\n", val);
+        evaluationRes->push_back(val);
+    }
+
+    void CodeGenVisitor::handleTopLevelDefinition(FunctionAST &node)
+    {
+        jitTopLevel = false;
+
+        jit->addModule(std::move(module));
+        initModuleAndPassManager();
+
+        node.accept(*this);
+    }
+
+    void CodeGenVisitor::handleTopLevelExtern(PrototypeAST &node)
+    {
+        jitTopLevel = false;
+        node.accept(*this);
+        functionProtos[node.getName()] = std::make_unique<PrototypeAST>(node);
+    }
+
+    void CodeGenVisitor::initModuleAndPassManager()
+    {
+        context = std::make_unique<llvm::LLVMContext>();
+        module = std::make_unique<llvm::Module>("jit", *context);
+        module->setDataLayout(jit->getTargetMachine().createDataLayout());
+        builder = std::make_unique<llvm::IRBuilder<>>(*context);
+
+        passManager = std::make_unique<llvm::legacy::FunctionPassManager>(module.get());
+        passManager->add(llvm::createInstructionCombiningPass());
+        passManager->add(llvm::createReassociatePass());
+        passManager->add(llvm::createGVNPass());
+        passManager->add(llvm::createCFGSimplificationPass());
+        passManager->doInitialization();
+    }
+
+    std::string CodeGenVisitor::getAssembly(const std::vector<std::unique_ptr<ASTNode>> &astData)
+    {
+        std::string res;
+        for (auto const& node: astData){
+            if (node != nullptr){
+                node->accept(*this);
+                res += ppformat();
+            }
+        }
+        return res;
+    }
+
+    std::unique_ptr<std::vector<double>> CodeGenVisitor::evaluate(const std::vector<std::unique_ptr<ASTNode>> &astData)
+    {
+        evaluationRes = std::make_unique<std::vector<double>>();
+        for (auto const& node: astData){
+            if (node != nullptr){
+                jitTopLevel = true;
+                node->accept(*this);
+            }
+        }
+        return std::move(evaluationRes);
+    }
+
+    llvm::Function *CodeGenVisitor::getFunction(const std::string& name)
+    {
+        if (auto *f = module->getFunction(name)){
+            return f;
+        }
+
+        auto fi = functionProtos.find(name);
+        if (fi != functionProtos.end()){
+           fi->second->accept(*this);
+            return this->lastFunction;
+        }
+
+        return nullptr;
     }
 }

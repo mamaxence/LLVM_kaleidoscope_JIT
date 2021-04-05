@@ -25,7 +25,7 @@ target_link_libraries(${PROJECT_NAME} compiler_lib)
 add_subdirectory(tests)
 
 # flags
-list(APPEND flags "-fPIC" "-Wall" "-Wextra" "-Wpedantic")
+list(APPEND flags "-fPIC" "-Wall" "-Wextra" "-Wpedantic" "-rdynamic")
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     list(APPEND flags "-g")
