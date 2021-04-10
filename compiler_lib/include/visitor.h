@@ -9,7 +9,6 @@
 #include <map>
 
 
-#include "ast.h"
 
 #include "llvm/IR/Value.h"
 #include "llvm/IR/LLVMContext.h"
@@ -22,6 +21,7 @@
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/GVN.h"
 
+#include "ast.h"
 #include "KaleidoscopeJIT.h"
 
 namespace ckalei{
