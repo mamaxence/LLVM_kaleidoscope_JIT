@@ -31,6 +31,7 @@ namespace ckalei{
     class VariableExprAST;
     class BinaryExprAST;
     class CallExprAST;
+    class IfExprAST;
     class PrototypeAST;
     class FunctionAST;
 
@@ -39,7 +40,8 @@ namespace ckalei{
         virtual void visit(NumberExprAST& node) = 0;
         virtual void visit(VariableExprAST& node) = 0;
         virtual void visit(BinaryExprAST& node) = 0;
-        virtual void visit(CallExprAST& node) = 0;
+        virtual void visit(CallExprAST& node) =  0;
+        virtual void visit(IfExprAST& node) {}; // TODO implement and make virtual
         virtual void visit(PrototypeAST& node) = 0;
         virtual void visit(FunctionAST& node) = 0;
     };

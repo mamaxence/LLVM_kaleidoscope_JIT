@@ -31,7 +31,6 @@ namespace ckalei {
         virtual ~ExprAST() = default;
     };
 
-
     /// Node representing a number
     class NumberExprAST : public ExprAST {
     public:
@@ -90,6 +89,43 @@ namespace ckalei {
         std::vector<std::unique_ptr<ExprAST>> args;
     };
 
+    /// IfExprAST: node for if then else expression
+    class IfExprAST: public ExprAST{
+    public:
+        /// Create ifExprAst node elseExpr can be null if the node have no expression
+        IfExprAST(
+                std::unique_ptr<ExprAST> cond,
+                std::unique_ptr<ExprAST> ifExpr,
+                std::unique_ptr<ExprAST> elseExpr)
+                : ifExpr(std::move(ifExpr)),
+                elseExpr(std::move(elseExpr)),
+                cond(std::move(cond)),
+                haveElse(true)
+        {}
+
+        IfExprAST(
+                std::unique_ptr<ExprAST> cond,
+                std::unique_ptr<ExprAST> ifExpr)
+                : ifExpr(std::move(ifExpr)),
+                  elseExpr(nullptr),
+                  cond(std::move(cond)),
+                  haveElse(false)
+        {}
+
+        void accept(Visitor& visitor);
+
+        const std::unique_ptr<ExprAST> &getCond() const{return cond;}
+        const std::unique_ptr<ExprAST> &getIfExpr() const {return ifExpr;}
+        const std::unique_ptr<ExprAST> &getElseExpr() const {return elseExpr;}
+        bool haveElseMember() const{return haveElse;}
+
+    private:
+        bool haveElse;
+        std::unique_ptr<ExprAST> cond;
+        std::unique_ptr<ExprAST> ifExpr;
+        std::unique_ptr<ExprAST> elseExpr;
+    };
+
     /// Node representing a function prototype
     class PrototypeAST: public ASTNode{
     public:
@@ -119,8 +155,6 @@ namespace ckalei {
         std::unique_ptr<PrototypeAST> proto;
         std::unique_ptr<ExprAST> body;
     };
-
-
 }
 
 #endif //LLVM_KALEIDOSCOPE_AST_H
