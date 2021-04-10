@@ -60,8 +60,10 @@ namespace ckalei {
             return parseIdentifierExpr();
         } else if (curTok == tok_number){
             return parseNumberExpr();
-        } else if (lexer->getOtherChar() == '('){
+        } else if (curTok == tok_other && lexer->getOtherChar() == '('){
             return parseParentExpr();
+        } else if(curTok == tok_if){
+            return parseIfThenElse();
         } else{
             return logError("unknown token when expecting an expression");
         }
@@ -116,6 +118,39 @@ namespace ckalei {
                 }
             }
             lhs = std::make_unique<BinaryExprAST>(std::move(lhs), std::move(rhs), binaryOp);
+        }
+    }
+
+    std::unique_ptr<ExprAST> Parser::parseIfThenElse()
+    {
+        // If part
+        getNextToken(); // eat if
+        auto condExpr = parseExpr();
+        if (not condExpr){
+            logError("Cond statement is invalid");
+        }
+
+        // Then part
+        if (curTok != tok_then){
+            logError("Expected 'thenExpr'");
+        }
+        getNextToken(); // eat thenExpr
+        auto thenExpr = parseExpr();
+        if (not thenExpr){
+            logError("thenExpr content is invalid");
+        }
+
+        // Else part
+        std::unique_ptr<ExprAST> elseExpr = nullptr;
+        if (curTok == tok_else){
+            getNextToken();
+            elseExpr = parseExpr();
+            if (not elseExpr){
+                logError("elseExpr content is invalid");
+            }
+            return std::make_unique<IfExprAST>(std::move(condExpr), std::move(thenExpr), std::move(elseExpr));
+        } else{
+            return std::make_unique<IfExprAST>(std::move(condExpr), std::move(thenExpr));
         }
     }
 

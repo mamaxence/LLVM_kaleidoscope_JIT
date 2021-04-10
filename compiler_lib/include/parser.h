@@ -49,10 +49,18 @@ namespace ckalei {
 
         // Handle expression parsing
     private:
+
         /// Parse an expr
         /// expression
         ///     ::= primary binoprhs
         std::unique_ptr<ExprAST> parseExpr();
+
+        /// Parse primary expression
+        /// primary
+        ///   ::= identifierexpr
+        ///   ::= numberexpr
+        ///   ::= parenexpr
+        std::unique_ptr<ExprAST> parsePrimary();
 
         /// Parse a number expression
         ///     numberexpr ::= number
@@ -68,18 +76,18 @@ namespace ckalei {
         ///     ::= identifier ( expression* )
         std::unique_ptr<ExprAST> parseIdentifierExpr();
 
-        /// Parse primary expression
-        /// primary
-        ///   ::= identifierexpr
-        ///   ::= numberexpr
-        ///   ::= parenexpr
-        std::unique_ptr<ExprAST> parsePrimary();
-
         /// Parse binary expression
         /// exprPrec: precedence of the operator
         /// binoprhs
         ///     ::= ( '+' primary)*
         std::unique_ptr<ExprAST> parseBinOpRhs(int exprPrec, std::unique_ptr<ExprAST> lhs);
+
+        /// Parse ifThenElse expression
+        /// ifThenElseExpr
+        ///     ::= 'if' expression 'then' expression'
+        ///     ::= 'if' expression 'then' expression  'else' expression
+        std::unique_ptr<ExprAST> parseIfThenElse();
+
 
         // Handle function definitions
     private:

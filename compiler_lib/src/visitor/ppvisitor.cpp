@@ -58,6 +58,19 @@ namespace ckalei{
         str += getLinePrefix() + ")\n";
     }
 
+    void PPrintorVisitor::visit(IfExprAST &node)
+    {
+        str += getLinePrefix() + "IfExpr(\n";
+        inc++;
+        node.getCond()->accept(*this);
+        node.getIfExpr()->accept(*this);
+        if (node.haveElseMember()){
+            node.getElseExpr()->accept(*this);
+        }
+        inc--;
+        str += getLinePrefix() + ")\n";
+    }
+
     void PPrintorVisitor::visit(FunctionAST &node)
     {
         str += getLinePrefix() + "Function(\n";
@@ -81,6 +94,7 @@ namespace ckalei{
     {
         return str;
     }
+
 
 }
 

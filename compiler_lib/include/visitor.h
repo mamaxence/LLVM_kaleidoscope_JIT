@@ -132,6 +132,13 @@ namespace ckalei{
         ///     $args*
         /// )
         void visit(CallExprAST& node) override;
+        /// Pretty print IfExpr
+        /// IfExpr(
+        ///     $cond
+        ///     $ifExpr
+        ///     $elseExpr?
+        /// )
+        void visit(IfExprAST& node) override;
         /// Pretty print Prototype
         /// Prototype($name(
         ///     $args*

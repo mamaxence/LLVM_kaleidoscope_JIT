@@ -200,3 +200,42 @@ Function(
     std::cout << program.ppformat();
     ASSERT_EQ(program.ppformat(), expected);
 }
+
+TEST (parser, if_then){
+    auto data = R""""(
+        if 1 then a
+                )"""";
+    auto expected =
+            R""""(Function(
+    Prototype(__anon_expr(
+    )
+    IfExpr(
+        NumberExpr(1)
+        VariableExpr(a)
+    )
+)
+)"""";
+    auto program = ckalei::Program(data);
+    std::cout << program.ppformat();
+    ASSERT_EQ(program.ppformat(), expected);
+}
+
+TEST (parser, if_then_else){
+    auto data = R""""(
+        if 1 then a else b
+                )"""";
+    auto expected =
+            R""""(Function(
+    Prototype(__anon_expr(
+    )
+    IfExpr(
+        NumberExpr(1)
+        VariableExpr(a)
+        VariableExpr(b)
+    )
+)
+)"""";
+    auto program = ckalei::Program(data);
+    std::cout << program.ppformat();
+    ASSERT_EQ(program.ppformat(), expected);
+}
