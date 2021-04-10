@@ -47,6 +47,10 @@ void assertTokOther(ckalei::Lexer &lexer, int expected)
     ASSERT_EQ(lexer.getOtherChar(), expected);
 }
 
+void assertTok(ckalei::Lexer &lexer, ckalei::Token tok){
+    ASSERT_EQ(lexer.getTok(), tok);
+}
+
 TEST (lexer, simple){
     auto data = R""""(def id=1.2
             # coment
@@ -89,3 +93,15 @@ TEST (lexer, simple3){
     assertTokIdentifier(lexer, "v2");
     assertTokOther(lexer, ')');
 }
+
+TEST (lexer, control){
+    auto data = R""""(
+            if
+            then
+            else)"""";
+    auto lexer = ckalei::Lexer(data);
+    assertTok(lexer, ckalei::tok_if);
+    assertTok(lexer, ckalei::tok_then);
+    assertTok(lexer, ckalei::tok_else);
+}
+

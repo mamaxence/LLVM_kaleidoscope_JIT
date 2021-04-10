@@ -24,9 +24,14 @@ namespace ckalei{
 
             if (identifierStr == "def"){
                 return tok_def;
-            }
-            if (identifierStr == "extern"){
+            } else if (identifierStr == "extern"){
                 return tok_extern;
+            } else if (identifierStr == "if"){
+                return tok_if;
+            } else if (identifierStr == "then"){
+                return tok_then;
+            } else if (identifierStr == "else"){
+                return tok_else;
             }
             return tok_identifier;
         }

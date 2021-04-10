@@ -23,6 +23,11 @@ namespace ckalei{
         tok_identifier,
         tok_number,
 
+        // control
+        tok_if,
+        tok_then,
+        tok_else,
+
         //other
         tok_other,
     };
