@@ -41,7 +41,7 @@ namespace ckalei{
         virtual void visit(VariableExprAST& node) = 0;
         virtual void visit(BinaryExprAST& node) = 0;
         virtual void visit(CallExprAST& node) =  0;
-        virtual void visit(IfExprAST& node) {}; // TODO implement and make virtual
+        virtual void visit(IfExprAST& node) = 0;
         virtual void visit(PrototypeAST& node) = 0;
         virtual void visit(FunctionAST& node) = 0;
     };
@@ -59,6 +59,8 @@ namespace ckalei{
         void visit(BinaryExprAST& node) override;
         /// Generate code for CallExpr AST. Set lastValue.
         void visit(CallExprAST& node) override;
+        /// Generate code for IfThenElse node. Set lastValue
+        void visit(IfExprAST& node) override;
         /// Generate code for Prototype node. Set lastFunction.
         void visit(PrototypeAST& node) override;
         /// Generate code for Function node. Set lastFunction.

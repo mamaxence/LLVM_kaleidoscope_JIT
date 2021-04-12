@@ -71,7 +71,7 @@ TEST (jit, internal_call){
     std::vector<double> expected{7};
 
     auto program = ckalei::Program(data);
-    std::cout << program.ppformat();
+    std::cout << program.getAssembly();
     auto res = *program.evaluate();
     testVectorEqual(expected, res);
 }
@@ -87,3 +87,43 @@ TEST (jit, external){
     auto res = *program.evaluate();
     testVectorEqual(expected, res);
 }
+
+TEST (jit, simple_if){
+    auto data = R""""(
+    def foo(x)
+    if x then
+        x * 2
+    else
+        0.1
+    foo(3))"""";
+    std::vector<double> expected{6.0};
+
+    auto program = ckalei::Program(data);
+    std::cerr << program.ppformat();
+    std::cerr << program.getAssembly();
+    auto res = *program.evaluate();
+    testVectorEqual(expected, res);
+}
+
+TEST (jit, if_in_if){
+    auto data = R""""(
+    def foo(x y)
+    if x then
+        if y then x + y else 1001
+    else
+        if y then 0 else 1000
+    foo(4 2)
+    foo(4 0)
+    foo(0 2)
+    foo(0 0)
+)"""";
+    std::vector<double> expected{6.0, 1001.0, 0.0, 1000.0};
+
+    auto program = ckalei::Program(data);
+    std::cerr << program.ppformat();
+    std::cerr << program.getAssembly();
+    auto res = *program.evaluate();
+    testVectorEqual(expected, res);
+}
+
+

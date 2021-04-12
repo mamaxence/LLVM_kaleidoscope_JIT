@@ -96,6 +96,55 @@ namespace ckalei{
         lastValue = builder->CreateCall(calleeF, argsVals, "calltmp");
     }
 
+    void CodeGenVisitor::visit(IfExprAST &node)
+    {
+
+        node.getCond()->accept(*this);
+        if (! lastValue){return;}
+        auto condVal = lastValue;
+
+        // Convert condition to a bool
+        condVal = builder->CreateFCmpONE(condVal, llvm::ConstantFP::get(*context, llvm::APFloat(0.0)), "ifcond");
+
+
+        llvm::Function *function = builder->GetInsertBlock()->getParent();
+        llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(*context, "then", function);
+        llvm::BasicBlock *elseBB = llvm::BasicBlock::Create(*context, "else");
+        llvm::BasicBlock *mergeBB = llvm::BasicBlock::Create(*context, "ifcont");
+        builder->CreateCondBr(condVal, thenBB, elseBB);
+
+        // Create then value
+        builder->SetInsertPoint(thenBB);
+        node.getIfExpr()->accept(*this);
+        if (! lastValue){return;}
+        auto thenExpr = lastValue;
+        builder->CreateBr(mergeBB);
+        thenBB = builder->GetInsertBlock();
+
+        // Create else value
+        function->getBasicBlockList().push_back(elseBB);
+        builder->SetInsertPoint(elseBB);
+        llvm::Value *elseExpr = nullptr;
+        if (node.haveElseMember()){
+            node.getElseExpr()->accept(*this);
+            if (! lastValue){return;}
+            elseExpr = lastValue;
+            builder->CreateBr(mergeBB);
+        } else{
+            logErrorV("Omitted Else are not supported yet");
+            return;
+        }
+        elseBB = builder->GetInsertBlock();
+
+        function->getBasicBlockList().push_back(mergeBB);
+        builder->SetInsertPoint(mergeBB);
+        llvm::PHINode *phiN = builder->CreatePHI(llvm::Type::getDoubleTy(*context), 2, "iftmp");
+
+        phiN->addIncoming(thenExpr, thenBB);
+        phiN->addIncoming(elseExpr, elseBB);
+        lastValue = phiN;
+    }
+
     void CodeGenVisitor::visit(PrototypeAST &node)
     {
         if (jitTopLevel){
