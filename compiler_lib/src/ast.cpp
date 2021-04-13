@@ -38,4 +38,9 @@ namespace ckalei{
     {
         visitor.visit(*this);
     }
+
+    void ForExprAST::accept(Visitor &visitor)
+    {
+        visitor.visit(*this);
+    }
 }

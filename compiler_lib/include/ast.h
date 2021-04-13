@@ -126,6 +126,38 @@ namespace ckalei {
         std::unique_ptr<ExprAST> elseExpr;
     };
 
+    /// Node representing a for loop
+    class ForExprAST: public ExprAST{
+
+    public:
+        ForExprAST(
+                std::unique_ptr<ExprAST> start,
+                std::unique_ptr<ExprAST> step,
+                std::unique_ptr<ExprAST> end,
+                std::unique_ptr<ExprAST> body,
+                const std::string &varName
+                )
+                : start(std::move(start)),
+                step(std::move(step)),
+                end(std::move(end)),
+                varName(varName){};
+
+        void accept(Visitor& visitor);
+
+        const std::string &getVarName() const{return varName;}
+        const std::unique_ptr<ExprAST> &getStart() const{return start;}
+        const std::unique_ptr<ExprAST> &getStep() const{return step;}
+        const std::unique_ptr<ExprAST> &getEnd() const{return end;}
+        const std::unique_ptr<ExprAST> &getBody() const{return body;}
+
+    private:
+        std::string varName;
+        std::unique_ptr<ExprAST> start;
+        std::unique_ptr<ExprAST> step;
+        std::unique_ptr<ExprAST> end;
+        std::unique_ptr<ExprAST> body;
+    };
+
     /// Node representing a function prototype
     class PrototypeAST: public ASTNode{
     public:
