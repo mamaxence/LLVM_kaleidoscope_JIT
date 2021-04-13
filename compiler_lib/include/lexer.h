@@ -28,6 +28,10 @@ namespace ckalei{
         tok_then,
         tok_else,
 
+        // for
+        tok_for,
+        tok_in,
+
         //other
         tok_other,
     };

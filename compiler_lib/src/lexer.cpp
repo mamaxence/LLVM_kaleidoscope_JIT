@@ -32,6 +32,10 @@ namespace ckalei{
                 return tok_then;
             } else if (identifierStr == "else"){
                 return tok_else;
+            } else if (identifierStr == "for"){
+                return tok_for;
+            } else if (identifierStr == "in"){
+                return tok_in;
             }
             return tok_identifier;
         }

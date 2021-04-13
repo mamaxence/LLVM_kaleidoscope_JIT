@@ -94,14 +94,18 @@ TEST (lexer, simple3){
     assertTokOther(lexer, ')');
 }
 
-TEST (lexer, control){
+TEST (lexer, control_for){
     auto data = R""""(
             if
             then
-            else)"""";
+            else
+            for
+            in)"""";
     auto lexer = ckalei::Lexer(data);
     assertTok(lexer, ckalei::tok_if);
     assertTok(lexer, ckalei::tok_then);
     assertTok(lexer, ckalei::tok_else);
+    assertTok(lexer, ckalei::tok_for);
+    assertTok(lexer, ckalei::tok_in);
 }
 
