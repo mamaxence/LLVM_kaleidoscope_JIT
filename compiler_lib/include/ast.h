@@ -140,6 +140,7 @@ namespace ckalei {
                 : start(std::move(start)),
                 step(std::move(step)),
                 end(std::move(end)),
+                body(std::move(body)),
                 varName(varName){};
 
         void accept(Visitor& visitor);

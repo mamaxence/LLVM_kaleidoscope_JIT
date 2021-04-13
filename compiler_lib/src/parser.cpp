@@ -64,6 +64,8 @@ namespace ckalei {
             return parseParentExpr();
         } else if(curTok == tok_if){
             return parseIfThenElse();
+        } else if (curTok == tok_for){
+            return parseForExpr();
         } else{
             return logError("unknown token when expecting an expression");
         }
@@ -127,17 +129,17 @@ namespace ckalei {
         getNextToken(); // eat if
         auto condExpr = parseExpr();
         if (not condExpr){
-            logError("Cond statement is invalid");
+            return logError("Cond statement is invalid");
         }
 
         // Then part
         if (curTok != tok_then){
-            logError("Expected 'thenExpr'");
+            return logError("Expected 'thenExpr'");
         }
         getNextToken(); // eat thenExpr
         auto thenExpr = parseExpr();
         if (not thenExpr){
-            logError("thenExpr content is invalid");
+            return logError("thenExpr content is invalid");
         }
 
         // Else part
@@ -146,12 +148,70 @@ namespace ckalei {
             getNextToken();
             elseExpr = parseExpr();
             if (not elseExpr){
-                logError("elseExpr content is invalid");
+                return logError("elseExpr content is invalid");
             }
             return std::make_unique<IfExprAST>(std::move(condExpr), std::move(thenExpr), std::move(elseExpr));
         } else{
             return std::make_unique<IfExprAST>(std::move(condExpr), std::move(thenExpr));
         }
+    }
+
+    std::unique_ptr<ExprAST> Parser::parseForExpr()
+    {
+        getNextToken(); // eat for
+
+        if (curTok != tok_identifier){
+            return logError("Expected Expression");
+        }
+        auto varName = lexer->getIdentifier();
+        getNextToken(); // eat identifier
+
+        if (curTok != tok_other && lexer->getOtherChar() != '='){
+            return logError("Expected '='");
+        }
+        getNextToken(); // eat '='
+
+        // start expr
+        auto startExpr = parseExpr();
+        if (not startExpr){
+            return logError("startExpr content is invalid");
+        }
+        if (curTok != tok_other && lexer->getOtherChar() != ','){
+            return logError("Expected ','");
+        }
+        getNextToken(); // eat ','
+
+        // end expr
+        auto endExpr = parseExpr();
+        if (not endExpr){
+            return logError("endExpr content is invalid");
+        }
+        if (curTok != tok_other && lexer->getOtherChar() != ','){
+            return logError("Expected ','");
+        }
+        getNextToken(); // eat ','
+
+        // step expr
+        auto stepExpr = parseExpr();
+        if (not stepExpr){
+            return logError("stepExpr content is invalid");
+        }
+
+        if (curTok != tok_in){
+            return logError("Expected 'in'");
+        }
+        getNextToken(); // eat 'in'
+
+        auto bodyExpr = parseExpr();
+        if (not bodyExpr){
+            return logError("bodyExpr content is invalid");
+        }
+
+        return std::make_unique<ForExprAST>(std::move(startExpr),
+                                            std::move(stepExpr),
+                                            std::move(endExpr),
+                                            std::move(bodyExpr),
+                                            varName);
     }
 
     std::unique_ptr<PrototypeAST> Parser::parsePrototype()

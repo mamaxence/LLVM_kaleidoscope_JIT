@@ -143,6 +143,15 @@ namespace ckalei{
         ///     $elseExpr?
         /// )
         void visit(IfExprAST& node) override;
+        /// Pretty print ForExpr
+        /// ForExprAST(
+        ///     $varName
+        ///     $startExpr
+        ///     $stepExpr
+        ///     $endExpr
+        ///     $bodyExpr
+        ///)
+        void visit(ForExprAST& node) override;
         /// Pretty print Prototype
         /// Prototype($name(
         ///     $args*

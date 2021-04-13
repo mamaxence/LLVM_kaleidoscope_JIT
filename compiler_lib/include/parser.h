@@ -60,6 +60,8 @@ namespace ckalei {
         ///   ::= identifierexpr
         ///   ::= numberexpr
         ///   ::= parenexpr
+        ///   ::= ifThenElseExpr
+        ///   ::= lorLoopExpr
         std::unique_ptr<ExprAST> parsePrimary();
 
         /// Parse a number expression
@@ -87,6 +89,11 @@ namespace ckalei {
         ///     ::= 'if' expression 'then' expression'
         ///     ::= 'if' expression 'then' expression  'else' expression
         std::unique_ptr<ExprAST> parseIfThenElse();
+
+        /// Parse for loop expression
+        /// forLoopExpr
+        ///     ::= 'for' id '=' expression "," expression "," expression "in" expression
+        std::unique_ptr<ExprAST> parseForExpr();
 
 
         // Handle function definitions

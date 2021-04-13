@@ -239,3 +239,85 @@ TEST (parser, if_then_else){
     std::cout << program.ppformat();
     ASSERT_EQ(program.ppformat(), expected);
 }
+TEST (parser, for){
+    auto data = R""""(
+        for a = 1, 10, 1 in a * 2
+                )"""";
+    auto expected =
+            R""""(Function(
+    Prototype(__anon_expr(
+    )
+    ForExpr(
+        a
+        NumberExpr(1)
+        NumberExpr(1)
+        NumberExpr(10)
+        BinaryExpr(
+            VariableExpr(a)
+            *
+            NumberExpr(2)
+        )
+    )
+)
+)"""";
+    auto program = ckalei::Program(data);
+    std::cout << program.ppformat();
+    ASSERT_EQ(program.ppformat(), expected);
+}
+
+TEST (parser, complex_for){
+    auto data = R""""(
+        for i = 1, b*10, 2-1 in
+            for j = i, i * 10, 1 in
+                if i -1 then
+                    i
+                else
+                    j * 2
+                )"""";
+    auto expected =
+            R""""(Function(
+    Prototype(__anon_expr(
+    )
+    ForExpr(
+        i
+        NumberExpr(1)
+        BinaryExpr(
+            NumberExpr(2)
+            -
+            NumberExpr(1)
+        )
+        BinaryExpr(
+            VariableExpr(b)
+            *
+            NumberExpr(10)
+        )
+        ForExpr(
+            j
+            VariableExpr(i)
+            NumberExpr(1)
+            BinaryExpr(
+                VariableExpr(i)
+                *
+                NumberExpr(10)
+            )
+            IfExpr(
+                BinaryExpr(
+                    VariableExpr(i)
+                    -
+                    NumberExpr(1)
+                )
+                VariableExpr(i)
+                BinaryExpr(
+                    VariableExpr(j)
+                    *
+                    NumberExpr(2)
+                )
+            )
+        )
+    )
+)
+)"""";
+    auto program = ckalei::Program(data);
+    std::cout << program.ppformat();
+    ASSERT_EQ(program.ppformat(), expected);
+}
