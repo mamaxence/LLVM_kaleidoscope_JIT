@@ -162,16 +162,27 @@ namespace ckalei {
     /// Node representing a function prototype
     class PrototypeAST: public ASTNode{
     public:
-        PrototypeAST(std::string name, std::vector<std::string> args): name(std::move(name)), args(std::move(args)) {};
+        PrototypeAST(std::string name,
+                     std::vector<std::string> args,
+                     bool isOperator = false,
+                     unsigned precedence = 0):
+                        name(std::move(name)),
+                        args(std::move(args)),
+                        isOperator(isOperator),
+                        precedence(precedence){};
         PrototypeAST(const PrototypeAST& other): name(other.getName()), args(other.getArgs())  {};
 
         void accept(Visitor& visitor);
         const std::string &getName() const {return name;}
         const std::vector<std::string> &getArgs() const {return args;}
+        bool isOperatorProto() const{return isOperator;}
+        unsigned int getPrecedence() const{return precedence;}
 
     private:
         std::string name;
         std::vector<std::string> args;
+        bool isOperator;
+        unsigned precedence; // precedence if a binary op.
     };
 
     /// Node representing a function declaration
