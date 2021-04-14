@@ -98,7 +98,6 @@ namespace ckalei{
 
     void CodeGenVisitor::visit(IfExprAST &node)
     {
-
         node.getCond()->accept(*this);
         if (! lastValue){return;}
         auto condVal = lastValue;
@@ -143,6 +142,53 @@ namespace ckalei{
         phiN->addIncoming(thenExpr, thenBB);
         phiN->addIncoming(elseExpr, elseBB);
         lastValue = phiN;
+    }
+
+    void CodeGenVisitor::visit(ForExprAST &node)
+    {
+        node.getStart()->accept(*this);
+        if (! lastValue){return;}
+        auto startVal = lastValue;
+
+        llvm::Function *function = builder->GetInsertBlock()->getParent();
+        llvm::BasicBlock *PreheaderBB = builder->GetInsertBlock();
+        llvm::BasicBlock *loopBB = llvm::BasicBlock::Create(*context, "loop", function);
+        builder->CreateBr(loopBB);
+
+        // Create body
+        builder->SetInsertPoint(loopBB);
+        llvm::PHINode* variable = builder->CreatePHI(llvm::Type::getDoubleTy(*context), 2, node.getVarName());
+        variable->addIncoming(startVal, PreheaderBB);
+        llvm::Value* oldVar = namedValues[node.getVarName()]; // Save old var for restoration add set new var in context
+        namedValues[node.getVarName()] = variable;
+
+        node.getBody()->accept(*this); // create body code
+        if (! lastValue){return;}
+        node.getStep()->accept(*this); // compute step value
+        if (! lastValue){return;}
+        auto stepVal = lastValue;
+
+        llvm::Value *nextVar = builder->CreateFAdd(variable, stepVal, "nextvar");
+        node.getEnd()->accept(*this); // compute end value
+        if (! lastValue){return;}
+        auto endCond = lastValue;
+        endCond = builder->CreateFCmpONE(endCond, llvm::ConstantFP::get(*context, llvm::APFloat(0.0)), "loopcond");
+
+        llvm::BasicBlock *loopEndBB = builder->GetInsertBlock();
+        llvm::BasicBlock *afterBB = llvm::BasicBlock::Create(*context, "afterloop", function);
+
+        builder->CreateCondBr(endCond, loopBB, afterBB);
+        builder->SetInsertPoint(afterBB);
+
+        variable->addIncoming(nextVar, loopEndBB);
+
+        // restore shadowed variable
+        if (oldVar){
+            namedValues[node.getVarName()] = oldVar;
+        } else {
+            namedValues.erase(node.getVarName());
+        }
+        lastValue = llvm::Constant::getNullValue(llvm::Type::getDoubleTy(*context));
     }
 
     void CodeGenVisitor::visit(PrototypeAST &node)
@@ -298,4 +344,5 @@ namespace ckalei{
 
         return nullptr;
     }
+
 }
