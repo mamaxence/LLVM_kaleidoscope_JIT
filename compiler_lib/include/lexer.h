@@ -32,6 +32,10 @@ namespace ckalei{
         tok_for,
         tok_in,
 
+        // operators
+        tok_binary,
+        tok_unary,
+
         //other
         tok_other,
     };

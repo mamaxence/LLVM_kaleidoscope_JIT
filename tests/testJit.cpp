@@ -129,7 +129,7 @@ TEST (jit, if_in_if){
 TEST (jit, for){
     auto data = R""""(
     def foo(x y z)
-        for i = x, y, 1 in z + 1
+        for i = x, i < y, 1 in z + 1
     foo(1 10 2)
 )"""";
     std::vector<double> expected{0.0}; // TODO improve when go variable initialisation

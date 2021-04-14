@@ -109,3 +109,11 @@ TEST (lexer, control_for){
     assertTok(lexer, ckalei::tok_in);
 }
 
+TEST (lexer, operators){
+    auto data = R""""(
+            binary
+            unary)"""";
+    auto lexer = ckalei::Lexer(data);
+    assertTok(lexer, ckalei::tok_binary);
+    assertTok(lexer, ckalei::tok_unary);
+}

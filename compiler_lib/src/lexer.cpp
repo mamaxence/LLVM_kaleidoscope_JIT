@@ -36,6 +36,10 @@ namespace ckalei{
                 return tok_for;
             } else if (identifierStr == "in"){
                 return tok_in;
+            } else if (identifierStr == "binary"){
+                return tok_binary;
+            } else if (identifierStr == "unary"){
+                return tok_unary;
             }
             return tok_identifier;
         }
