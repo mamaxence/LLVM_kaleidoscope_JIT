@@ -21,6 +21,16 @@ namespace ckalei{
         str += fmt::format(getLinePrefix() + "VariableExpr({})\n", node.getName());
     }
 
+    void PPrintorVisitor::visit(UnaryExprAST &node)
+    {
+        str += getLinePrefix() + "UnaryExpr(\n";
+        inc++;
+        str += fmt::format(getLinePrefix() + "{}\n", node.getOpcode());
+        node.getExpr()->accept(*this);
+        inc--;
+        str += getLinePrefix() + ")\n";
+    }
+
     void PPrintorVisitor::visit(BinaryExprAST &node)
     {
         str += getLinePrefix() + "BinaryExpr(\n";

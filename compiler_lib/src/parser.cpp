@@ -73,7 +73,7 @@ namespace ckalei {
 
     std::unique_ptr<ExprAST> Parser::parseExpr()
     {
-        auto lhs = parsePrimary();
+        auto lhs = parseUnaryExpr();
         if (!lhs){
             getNextToken();
             return nullptr;
@@ -98,6 +98,21 @@ namespace ckalei {
         }
     }
 
+    std::unique_ptr<ExprAST> Parser::parseUnaryExpr()
+    {
+        if (curTok != tok_other){
+            return std::move(parsePrimary());
+        } else {
+            char op = (char) lexer->getOtherChar();
+            if (op == '(' || op == ','){
+                return std::move(parsePrimary());
+            }
+            getNextToken(); // eat op
+            auto expr = parseUnaryExpr();
+            return std::make_unique<UnaryExprAST>(op, std::move(expr));
+        }
+    }
+
     std::unique_ptr<ExprAST> Parser::parseBinOpRhs(int exprPrec, std::unique_ptr<ExprAST> lhs)
     {
         while (true){
@@ -108,7 +123,7 @@ namespace ckalei {
             // here we know we have a bin expression
             int binaryOp = lexer->getOtherChar();
             getNextToken();
-            auto rhs = parsePrimary();
+            auto rhs = parseUnaryExpr();
             if (!rhs){
                 return nullptr;
             }
@@ -314,4 +329,5 @@ namespace ckalei {
             }
         }
     }
+
 }

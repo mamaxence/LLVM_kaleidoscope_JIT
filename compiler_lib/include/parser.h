@@ -52,7 +52,7 @@ namespace ckalei {
 
         /// Parse an expr
         /// expression
-        ///     ::= primary binoprhs
+        ///     ::= unary binoprhs
         std::unique_ptr<ExprAST> parseExpr();
 
         /// Parse primary expression
@@ -78,10 +78,16 @@ namespace ckalei {
         ///     ::= identifier ( expression* )
         std::unique_ptr<ExprAST> parseIdentifierExpr();
 
+        /// Parse unary expression
+        /// unary
+        ///     ::= primary
+        ///     ::= '!' unary
+        std::unique_ptr<ExprAST> parseUnaryExpr();
+
         /// Parse binary expression
         /// exprPrec: precedence of the operator
         /// binoprhs
-        ///     ::= ( '+' primary)*
+        ///     ::= ( '+' unary)*
         std::unique_ptr<ExprAST> parseBinOpRhs(int exprPrec, std::unique_ptr<ExprAST> lhs);
 
         /// Parse ifThenElse expression

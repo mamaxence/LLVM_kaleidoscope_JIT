@@ -106,7 +106,7 @@ TEST (parser, opperator_definition){
                     (v1 * v2) * (v1 - v2);
                 def unary - (v)
                     0 - v;
-                1 % 2;
+                -!1 % !2;
                 )"""";
     auto expected =
             R""""(Function(
@@ -142,9 +142,18 @@ Function(
     Prototype(__anon_expr(
     )
     BinaryExpr(
-        NumberExpr(1)
+        UnaryExpr(
+            -
+            UnaryExpr(
+                !
+                NumberExpr(1)
+            )
+        )
         %
-        NumberExpr(2)
+        UnaryExpr(
+            !
+            NumberExpr(2)
+        )
     )
 )
 )"""";

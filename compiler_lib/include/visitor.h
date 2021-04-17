@@ -128,6 +128,12 @@ namespace ckalei{
         /// Pretty print VariableExpr
         /// VariableExpr($varname)
         void visit(VariableExprAST& node) override;
+        /// Pretty print UnaryExpr node
+        /// UnaryExpr(
+        ///     $op
+        ///     $expr
+        /// )
+        void visit(UnaryExprAST& node) override;
         /// Pretty print BinaryExpr
         /// BinaryExpr(
         ///     $leftOp
