@@ -214,16 +214,24 @@ namespace ckalei {
                                             varName);
     }
 
+    enum ProtoKind{
+        function,
+        binary,
+        unary,
+    };
+
     std::unique_ptr<PrototypeAST> Parser::parsePrototype()
     { // TODO bug if unary / (a b) -> create a binary op with precedence 0
         // Parse a function prototype
         bool isOperator = false;
         unsigned precedence = 0;
         std::string name;
+        ProtoKind kind;
 
         if (curTok == tok_identifier){
             name = lexer->getIdentifier();
             getNextToken();
+            kind = ProtoKind::function;
         } else if (curTok == tok_binary) {// Parse a binary op declaration : "binary" LETTER number
             getNextToken(); // eat binary
             if (curTok != tok_other){return logErrorP("expected operator");}
@@ -235,6 +243,7 @@ namespace ckalei {
             if (lexer->getNumVal() < 0){return logErrorP("Precedence must be > 0");}
             precedence = (unsigned) lexer->getNumVal();
             getNextToken(); // eat precedence val
+            kind = ProtoKind::binary;
         } else if (curTok == tok_unary){ // Parse unary operator declaration
             getNextToken(); // eat unary
             if (curTok != tok_other){return logErrorP("expected operator");}
@@ -242,6 +251,7 @@ namespace ckalei {
             name.push_back((char) lexer->getOtherChar());
             isOperator = true;
             getNextToken(); // eat operator name
+            kind = ProtoKind::unary;
         }else{
             return logErrorP("Expected function name in prototype");
         }
@@ -255,6 +265,10 @@ namespace ckalei {
         }
         if (curTok != tok_other || lexer->getOtherChar() != ')'){return logErrorP("Expected )");};
         getNextToken(); // eat )
+
+        // Check args number consistency
+        if (kind == binary && argNames.size() != 2){ return logErrorP("Binary op need two args");}
+        else if (kind == unary && argNames.size() != 1){ return logErrorP("Binary op need one arg");}
 
         return std::make_unique<PrototypeAST>(name, std::move(argNames), isOperator, precedence);
     }
