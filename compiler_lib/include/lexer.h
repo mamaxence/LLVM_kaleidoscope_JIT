@@ -36,6 +36,9 @@ namespace ckalei{
         tok_binary,
         tok_unary,
 
+        // var
+        tok_var,
+
         //other
         tok_other,
     };

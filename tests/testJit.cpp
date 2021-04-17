@@ -197,3 +197,14 @@ TEST (jit, rec_fib){
     auto res = *program.evaluate();
     testVectorEqual(expected, res);
 }
+//
+//TEST (jit, variableAssigment){
+//    auto data = R""""(
+//        a = 1;
+//        a
+//    )"""";
+//    std::vector<double> expected{1};
+//    auto program = ckalei::Program(data);
+//    auto res = *program.evaluate();
+//    testVectorEqual(expected, res);
+//}

@@ -117,3 +117,13 @@ TEST (lexer, operators){
     assertTok(lexer, ckalei::tok_binary);
     assertTok(lexer, ckalei::tok_unary);
 }
+
+TEST (lexer, var){
+    auto data = R""""(
+            var a = 1)"""";
+    auto lexer = ckalei::Lexer(data);
+    assertTok(lexer, ckalei::tok_var);
+    assertTokIdentifier(lexer, "a");
+    assertTokOther(lexer, '=');
+    assertTokNumber(lexer, 1);
+}

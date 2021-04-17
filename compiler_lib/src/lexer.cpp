@@ -40,6 +40,8 @@ namespace ckalei{
                 return tok_binary;
             } else if (identifierStr == "unary"){
                 return tok_unary;
+            } else if(identifierStr == "var"){
+                return tok_var;
             }
             return tok_identifier;
         }
