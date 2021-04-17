@@ -71,7 +71,6 @@ TEST (jit, internal_call){
     std::vector<double> expected{7};
 
     auto program = ckalei::Program(data);
-    std::cout << program.getAssembly();
     auto res = *program.evaluate();
     testVectorEqual(expected, res);
 }
@@ -99,8 +98,6 @@ TEST (jit, simple_if){
     std::vector<double> expected{6.0};
 
     auto program = ckalei::Program(data);
-    std::cerr << program.ppformat();
-    std::cerr << program.getAssembly();
     auto res = *program.evaluate();
     testVectorEqual(expected, res);
 }
@@ -120,8 +117,6 @@ TEST (jit, if_in_if){
     std::vector<double> expected{6.0, 1001.0, 0.0, 1000.0};
 
     auto program = ckalei::Program(data);
-    std::cerr << program.ppformat();
-    std::cerr << program.getAssembly();
     auto res = *program.evaluate();
     testVectorEqual(expected, res);
 }
@@ -135,8 +130,52 @@ TEST (jit, for){
     std::vector<double> expected{0.0}; // TODO improve when go variable initialisation
 
     auto program = ckalei::Program(data);
-    std::cerr << program.ppformat();
-    std::cerr << program.getAssembly();
+    auto res = *program.evaluate();
+    testVectorEqual(expected, res);
+}
+
+TEST (jit, binop){
+    auto data = R""""(
+    def binary | 10 (a b)
+        if (a + b) then
+            1
+        else
+            0
+    def binary & 10 (a b)
+        if (a * b) then
+            1
+        else
+            0
+    1 | 1;
+    0 | 1;
+    1 | 0;
+    0 | 0;
+    1 * 1;
+    0 * 1;
+    1 * 0;
+    0 * 0;
+    )"""";
+    std::vector<double> expected{1, 1, 1, 0, 1, 0, 0, 0};
+    auto program = ckalei::Program(data);
+    auto res = *program.evaluate();
+    testVectorEqual(expected, res);
+}
+
+TEST (jit, unary_op){
+    auto data = R""""(
+    def unary - (v)
+        0 - v;
+    def unary ! (v)
+        if v then
+            0
+        else
+            1;
+    -!0;
+    2 * -1;
+    ! (2* -2);
+    )"""";
+    std::vector<double> expected{-1, -2, 0};
+    auto program = ckalei::Program(data);
     auto res = *program.evaluate();
     testVectorEqual(expected, res);
 

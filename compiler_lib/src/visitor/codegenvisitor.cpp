@@ -67,8 +67,23 @@ namespace ckalei{
                 lastValue = builder->CreateUIToFP(lv, llvm::Type::getDoubleTy(*context), "booltmp");
                 return;
             default:
-                lastValue = logErrorV("invalid binary operator");
+                break;
         }
+        llvm::Function *f = getFunction(std::string("binary")+node.getOp());
+        assert(f && "binary operator not found");
+        llvm::Value *ops[2] = {lv, rv};
+        lastValue = builder->CreateCall(f, ops, "binop");
+    }
+
+    void CodeGenVisitor::visit(UnaryExprAST &node)
+    {
+        node.getExpr()->accept(*this);
+        if (!lastValue){return;}
+        auto expr = lastValue;
+        llvm::Function *f = getFunction(std::string("unary")+node.getOpcode());
+        assert(f && "binary operator not found");
+        llvm::Value *ops[1] = {expr};
+        lastValue = builder->CreateCall(f, ops, "binop");
     }
 
     void CodeGenVisitor::visit(CallExprAST &node)
