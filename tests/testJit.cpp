@@ -178,5 +178,22 @@ TEST (jit, unary_op){
     auto program = ckalei::Program(data);
     auto res = *program.evaluate();
     testVectorEqual(expected, res);
+}
 
+TEST (jit, rec_fib){
+    auto data = R""""(
+        def fib(x)
+            if (x < 3) then
+                1
+            else
+                fib(x-1)+fib(x-2);
+        fib(3)
+        fib(4)
+        fib(5)
+        fib(10)
+    )"""";
+    std::vector<double> expected{2, 3, 5, 55};
+    auto program = ckalei::Program(data);
+    auto res = *program.evaluate();
+    testVectorEqual(expected, res);
 }

@@ -285,7 +285,6 @@ namespace ckalei{
         }
         double (*fp)() = (double (*)()) (intptr_t) exprSymbol.getAddress().get();
         double val = fp();
-        fprintf(stderr, "Evaluated to %f\n", val);
         evaluationRes->push_back(val);
     }
 
