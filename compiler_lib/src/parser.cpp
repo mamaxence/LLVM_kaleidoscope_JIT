@@ -240,7 +240,7 @@ namespace ckalei {
             isOperator = true;
             getNextToken(); // eat operator name
             if (curTok != tok_number){return logErrorP("Expected precedence");}
-            if (lexer->getNumVal() < 0){return logErrorP("Precedence must be > 0");}
+            if (lexer->getNumVal() < 1){return logErrorP("Precedence must be > 1");}
             precedence = (unsigned) lexer->getNumVal();
             getNextToken(); // eat precedence val
             kind = ProtoKind::binary;
