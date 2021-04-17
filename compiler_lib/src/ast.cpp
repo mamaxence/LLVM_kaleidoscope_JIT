@@ -43,4 +43,9 @@ namespace ckalei{
     {
         visitor.visit(*this);
     }
+
+    void UnaryExprAST::accept(Visitor &visitor)
+    {
+        visitor.visit(*this);
+    }
 }

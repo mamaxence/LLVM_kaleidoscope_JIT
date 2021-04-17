@@ -30,6 +30,7 @@ namespace ckalei{
     class NumberExprAST;
     class VariableExprAST;
     class BinaryExprAST;
+    class UnaryExprAST;
     class CallExprAST;
     class IfExprAST;
     class ForExprAST;
@@ -41,6 +42,7 @@ namespace ckalei{
         virtual void visit(NumberExprAST& node) = 0;
         virtual void visit(VariableExprAST& node) = 0;
         virtual void visit(BinaryExprAST& node) = 0;
+        virtual void visit(UnaryExprAST& node) {}; // TODO
         virtual void visit(CallExprAST& node) =  0;
         virtual void visit(IfExprAST& node) = 0;
         virtual void visit(ForExprAST& node) = 0;

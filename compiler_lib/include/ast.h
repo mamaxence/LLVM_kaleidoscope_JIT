@@ -55,6 +55,21 @@ namespace ckalei {
         std::string name;
     };
 
+    /// Node representing an unary expression
+    class UnaryExprAST: public ExprAST {
+
+    public:
+        UnaryExprAST(char opcode, std::unique_ptr<ExprAST> expr): opcode(opcode), expr(std::move(expr)) {};
+        void accept(Visitor& visitor);
+
+        char getOpcode() const {return opcode;}
+        const std::unique_ptr<ExprAST> &getExpr() const {return expr;}
+
+    private:
+        char opcode;
+        std::unique_ptr<ExprAST> expr;
+    };
+
     /// Node representing a binary expressing
     class BinaryExprAST : public ExprAST {
     public:
