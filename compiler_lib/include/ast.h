@@ -27,8 +27,8 @@ namespace ckalei {
     /// Base class for all expression node
     class ExprAST: public ASTNode {
     public:
-        virtual void accept(Visitor& visitor) = 0;
-        virtual ~ExprAST() = default;
+        void accept(Visitor& visitor) override = 0;
+        ~ExprAST() override = default;
     };
 
     /// Node representing a number
@@ -36,8 +36,8 @@ namespace ckalei {
     public:
         explicit NumberExprAST(double val) : val(val)
         {};
-        void accept(Visitor& visitor);
-        double getVal() const {return val;}
+        void accept(Visitor& visitor) override;
+        [[nodiscard]] double getVal() const {return val;}
 
     private:
         double val;
@@ -48,8 +48,8 @@ namespace ckalei {
     public:
         explicit VariableExprAST(std::string name) : name(std::move(name))
         {};
-        void accept(Visitor& visitor);
-        const std::string &getName() const {return name;}
+        void accept(Visitor& visitor) override;
+        [[nodiscard]] const std::string &getName() const {return name;}
 
     private:
         std::string name;
@@ -60,10 +60,10 @@ namespace ckalei {
 
     public:
         UnaryExprAST(char opcode, std::unique_ptr<ExprAST> expr): opcode(opcode), expr(std::move(expr)) {};
-        void accept(Visitor& visitor);
+        void accept(Visitor& visitor) override;
 
-        char getOpcode() const {return opcode;}
-        const std::unique_ptr<ExprAST> &getExpr() const {return expr;}
+        [[nodiscard]] char getOpcode() const {return opcode;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getExpr() const {return expr;}
 
     private:
         char opcode;
@@ -77,15 +77,34 @@ namespace ckalei {
                       std::unique_ptr<ExprAST> rightExpr,
                       char op) : rightExpr(std::move(rightExpr)), leftExpr(std::move(leftExpr)), op(op)
         {};
-        void accept(Visitor& visitor);
+        void accept(Visitor& visitor) override;
 
-        char getOp() const {return op;}
-        const std::unique_ptr<ExprAST> &getRightExpr() const {return rightExpr;}
-        const std::unique_ptr<ExprAST> &getLeftExpr() const {return leftExpr;}
+        [[nodiscard]] char getOp() const {return op;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getRightExpr() const {return rightExpr;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getLeftExpr() const {return leftExpr;}
 
     private:
         char op; // operation of the expression
         std::unique_ptr<ExprAST>leftExpr, rightExpr;
+    };
+
+    /// Node representing variables creation: var a=1, b, c, d=2
+    class DeclarationExprAST: public  ExprAST{
+    public:
+        explicit DeclarationExprAST(std::unique_ptr<ExprAST> body,
+                                    std::vector<std::pair<std::string, std::unique_ptr<ExprAST>>> vars)
+                                    : vars(std::move(vars)), body(std::move(body))
+                                    {}
+        void accept(Visitor& visitor) override;
+
+        [[nodiscard]] const std::vector<std::pair<std::string, std::unique_ptr<ExprAST>>> &getVars() const {return vars;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getBody() const{return body;}
+
+    private:
+        // List of allocation, pairs name: values
+        std::vector<std::pair<std::string, std::unique_ptr<ExprAST>>> vars;
+        // Body where variable are valid
+        std::unique_ptr<ExprAST> body;
     };
 
     /// Node representing a function call
@@ -94,10 +113,10 @@ namespace ckalei {
         CallExprAST(std::string callee,
                     std::vector<std::unique_ptr<ExprAST>> args) : callee(std::move(callee)), args(std::move(args))
         {};
-        void accept(Visitor& visitor);
+        void accept(Visitor& visitor) override;
 
-        const std::string &getCallee() const {return callee;}
-        const std::vector<std::unique_ptr<ExprAST>> &getArgs() const {return args;}
+        [[nodiscard]] const std::string &getCallee() const {return callee;}
+        [[nodiscard]] const std::vector<std::unique_ptr<ExprAST>> &getArgs() const {return args;}
 
     private:
         std::string callee;
@@ -129,10 +148,10 @@ namespace ckalei {
 
         void accept(Visitor& visitor);
 
-        const std::unique_ptr<ExprAST> &getCond() const{return cond;}
-        const std::unique_ptr<ExprAST> &getIfExpr() const {return ifExpr;}
-        const std::unique_ptr<ExprAST> &getElseExpr() const {return elseExpr;}
-        bool haveElseMember() const{return haveElse;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getCond() const{return cond;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getIfExpr() const {return ifExpr;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getElseExpr() const {return elseExpr;}
+        [[nodiscard]] bool haveElseMember() const{return haveElse;}
 
     private:
         bool haveElse;
@@ -150,21 +169,21 @@ namespace ckalei {
                 std::unique_ptr<ExprAST> step,
                 std::unique_ptr<ExprAST> end,
                 std::unique_ptr<ExprAST> body,
-                const std::string &varName
+                std::string varName
                 )
                 : start(std::move(start)),
                 step(std::move(step)),
                 end(std::move(end)),
                 body(std::move(body)),
-                varName(varName){};
+                varName(std::move(varName)){};
 
-        void accept(Visitor& visitor);
+        void accept(Visitor& visitor) override;
 
-        const std::string &getVarName() const{return varName;}
-        const std::unique_ptr<ExprAST> &getStart() const{return start;}
-        const std::unique_ptr<ExprAST> &getStep() const{return step;}
-        const std::unique_ptr<ExprAST> &getEnd() const{return end;}
-        const std::unique_ptr<ExprAST> &getBody() const{return body;}
+        [[nodiscard]] const std::string &getVarName() const{return varName;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getStart() const{return start;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getStep() const{return step;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getEnd() const{return end;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getBody() const{return body;}
 
     private:
         std::string varName;
@@ -180,18 +199,22 @@ namespace ckalei {
         PrototypeAST(std::string name,
                      std::vector<std::string> args,
                      bool isOperator = false,
-                     unsigned precedence = 0):
+                     int precedence = 0):
                         name(std::move(name)),
                         args(std::move(args)),
                         isOperator(isOperator),
                         precedence(precedence){};
-        PrototypeAST(const PrototypeAST& other): name(other.getName()), args(other.getArgs())  {};
+        PrototypeAST(const PrototypeAST& other):
+                name(other.getName()),
+                args(other.getArgs()),
+                isOperator(other.isOperatorProto()),
+                precedence(other.getPrecedence())  {};
 
-        void accept(Visitor& visitor);
-        const std::string &getName() const {return name;}
-        const std::vector<std::string> &getArgs() const {return args;}
-        bool isOperatorProto() const{return isOperator;}
-        int getPrecedence() const{return precedence;}
+        void accept(Visitor& visitor) override;
+        [[nodiscard]] const std::string &getName() const {return name;}
+        [[nodiscard]] const std::vector<std::string> &getArgs() const {return args;}
+        [[nodiscard]] bool isOperatorProto() const{return isOperator;}
+        [[nodiscard]] int getPrecedence() const{return precedence;}
 
     private:
         std::string name;
@@ -206,9 +229,9 @@ namespace ckalei {
         FunctionAST(std::unique_ptr<PrototypeAST> proto,
                     std::unique_ptr<ExprAST> body): proto(std::move(proto)), body(std::move(body)) {};
 
-        void accept(Visitor& visitor);
-        const std::unique_ptr<PrototypeAST> &getProto() const {return proto;}
-        const std::unique_ptr<ExprAST> &getBody() const {return body;}
+        void accept(Visitor& visitor) override;
+        [[nodiscard]] const std::unique_ptr<PrototypeAST> &getProto() const {return proto;}
+        [[nodiscard]] const std::unique_ptr<ExprAST> &getBody() const {return body;}
 
     private:
         std::unique_ptr<PrototypeAST> proto;
