@@ -42,6 +42,24 @@ namespace ckalei{
         str += getLinePrefix() + ")\n";
     }
 
+    void PPrintorVisitor::visit(DeclarationExprAST &node)
+    {
+        str += getLinePrefix() + "DeclarationExpr(\n";
+        inc++;
+        for (const auto &pair : node.getVars()){
+            str += getLinePrefix() + pair.first + "\n"; // name
+            if (pair.second){
+                inc++;
+                str += getLinePrefix() + "=\n";
+                pair.second->accept(*this);
+                inc--;
+            }
+        }
+        node.getBody()->accept(*this);
+        inc--;
+        str += getLinePrefix() + ")\n";
+    }
+
     void PPrintorVisitor::visit(CallExprAST &node)
     {
         str += fmt::format(getLinePrefix() + "CallExpr({}(\n",node.getCallee());

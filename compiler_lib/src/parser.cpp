@@ -64,8 +64,10 @@ namespace ckalei {
             return parseParentExpr();
         } else if(curTok == tok_if){
             return parseIfThenElse();
-        } else if (curTok == tok_for){
+        } else if (curTok == tok_for) {
             return parseForExpr();
+        } else if (curTok == tok_var){
+            return parseDeclarationExpr();
         } else{
             return logError("unknown token when expecting an expression");
         }
@@ -136,6 +138,40 @@ namespace ckalei {
             }
             lhs = std::make_unique<BinaryExprAST>(std::move(lhs), std::move(rhs), binaryOp);
         }
+    }
+
+    std::unique_ptr<ExprAST> Parser::parseDeclarationExpr()
+    {
+        getNextToken(); // eat 'var'
+        std::vector<std::pair<std::string, std::unique_ptr<ExprAST>>> vars;
+        // parse var list
+        while (true){
+            if (curTok != tok_identifier){
+                return logError("Expected identifier in declaration");
+            }
+            auto varName = lexer->getIdentifier();
+            getNextToken(); // eat var name
+            std::unique_ptr<ExprAST> varVal = nullptr;
+            if (curTok == tok_other && lexer->getOtherChar() == '='){
+                getNextToken(); // eat '='
+                varVal = parseExpr();
+            }
+            vars.emplace_back(varName, std::move(varVal));
+            if (curTok == tok_in){
+                getNextToken(); // eat 'in'
+                break;
+            } else{
+                if (curTok != tok_other && lexer->getOtherChar() != ','){return logError("Expected ','");}
+                getNextToken(); // eat ','
+            }
+        }
+
+        // parse body bloc
+        auto body = parseExpr();
+        if (!body){
+            return logError("invalid body");
+        }
+        return std::make_unique<DeclarationExprAST>(std::move(body), std::move(vars));
     }
 
     std::unique_ptr<ExprAST> Parser::parseIfThenElse()
@@ -329,5 +365,4 @@ namespace ckalei {
             }
         }
     }
-
 }

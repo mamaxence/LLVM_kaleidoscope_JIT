@@ -145,6 +145,14 @@ namespace ckalei{
         ///     $rightOp
         /// )
         void visit(BinaryExprAST& node) override;
+        /// Pretty print DeclarationExprAST
+        /// DeclarationExpr(
+        ///     ('var'
+        ///         (=
+        ///         val)?)+
+        ///     body
+        /// )
+        void visit(DeclarationExprAST& node) override;
         /// Pretty print CallExpr
         /// CallExpr($callee(
         ///     $args*

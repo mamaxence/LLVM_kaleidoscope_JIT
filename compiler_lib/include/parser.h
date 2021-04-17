@@ -63,6 +63,7 @@ namespace ckalei {
         ///   ::= parenexpr
         ///   ::= ifThenElseExpr
         ///   ::= lorLoopExpr
+        ///   ::= declexpr
         std::unique_ptr<ExprAST> parsePrimary();
 
         /// Parse a number expression
@@ -90,6 +91,11 @@ namespace ckalei {
         /// binoprhs
         ///     ::= ( '+' unary)*
         std::unique_ptr<ExprAST> parseBinOpRhs(int exprPrec, std::unique_ptr<ExprAST> lhs);
+
+        /// Parse var declaratiuon expression
+        /// declexpr
+        ///     ::= 'var' identifier ('=' expression)? (',' identifier ('=' expression)?)* 'in' expression
+        std::unique_ptr<ExprAST> parseDeclarationExpr();
 
         /// Parse ifThenElse expression
         /// ifThenElseExpr

@@ -383,3 +383,42 @@ TEST (parser, complex_for){
     std::cout << program.ppformat();
     ASSERT_EQ(program.ppformat(), expected);
 }
+TEST (parser, var_decl){
+    auto data = R""""(
+        var a=1, b, c=2+3, d in
+            var a = d+b in 1
+                )"""";
+    auto expected =
+            R""""(Function(
+    Prototype(__anon_expr(
+    )
+    DeclarationExpr(
+        a
+            =
+            NumberExpr(1)
+        b
+        c
+            =
+            BinaryExpr(
+                NumberExpr(2)
+                +
+                NumberExpr(3)
+            )
+        d
+        DeclarationExpr(
+            a
+                =
+                BinaryExpr(
+                    VariableExpr(d)
+                    +
+                    VariableExpr(b)
+                )
+            NumberExpr(1)
+        )
+    )
+)
+)"""";
+    auto program = ckalei::Program(data);
+    std::cout << program.ppformat();
+    ASSERT_EQ(program.ppformat(), expected);
+}
