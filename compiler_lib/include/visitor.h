@@ -155,7 +155,7 @@ namespace ckalei{
         ///)
         void visit(ForExprAST& node) override;
         /// Pretty print Prototype
-        /// Prototype($name(
+        /// Prototype($operator? $name $precedence?(
         ///     $args*
         /// )
         void visit(PrototypeAST& node) override;

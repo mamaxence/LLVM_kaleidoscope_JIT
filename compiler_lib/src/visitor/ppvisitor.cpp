@@ -47,7 +47,11 @@ namespace ckalei{
 
     void PPrintorVisitor::visit(PrototypeAST &node)
     {
-        str += fmt::format(getLinePrefix() + "Prototype({}(\n",node.getName());
+        if (node.isOperatorProto()){
+            str += fmt::format(getLinePrefix() + "Prototype({} {}(\n",node.getName(),node.getPrecedence());
+        }else{
+            str += fmt::format(getLinePrefix() + "Prototype({}(\n",node.getName());
+        }
 
         inc++;
         auto const &args = node.getArgs();

@@ -101,6 +101,8 @@ namespace ckalei {
         /// Parse a function prototype of form : fname(arg1 arg2 arg3)
         /// prototype
         ///     ::= id '(' id* ')'
+        ///     :: unary LETTER (id)
+        ///     :: binary LETTER number (id, id)
         std::unique_ptr<PrototypeAST> parsePrototype();
 
         /// Parse a function definition.

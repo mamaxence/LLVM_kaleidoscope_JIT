@@ -215,23 +215,48 @@ namespace ckalei {
     }
 
     std::unique_ptr<PrototypeAST> Parser::parsePrototype()
-    {
-        if (curTok != tok_identifier){
+    { // TODO bug if unary / (a b) -> create a binary op with precedence 0
+        // Parse a function prototype
+        bool isOperator = false;
+        unsigned precedence = 0;
+        std::string name;
+
+        if (curTok == tok_identifier){
+            name = lexer->getIdentifier();
+            getNextToken();
+        } else if (curTok == tok_binary) {// Parse a binary op declaration : "binary" LETTER number
+            getNextToken(); // eat binary
+            if (curTok != tok_other){return logErrorP("expected operator");}
+            name = "binary";
+            name.push_back((char) lexer->getOtherChar());
+            isOperator = true;
+            getNextToken(); // eat operator name
+            if (curTok != tok_number){return logErrorP("Expected precedence");}
+            if (lexer->getNumVal() < 0){return logErrorP("Precedence must be > 0");}
+            precedence = (unsigned) lexer->getNumVal();
+            getNextToken(); // eat precedence val
+        } else if (curTok == tok_unary){ // Parse unary operator declaration
+            getNextToken(); // eat unary
+            if (curTok != tok_other){return logErrorP("expected operator");}
+            name = "unary";
+            name.push_back((char) lexer->getOtherChar());
+            isOperator = true;
+            getNextToken(); // eat operator name
+        }else{
             return logErrorP("Expected function name in prototype");
         }
-        auto fname = lexer->getIdentifier();
-        getNextToken();
 
-        if (curTok != tok_other || lexer->getOtherChar() != '('){
-            return logErrorP("Expected (");
-        }
+        // parse args section
+        if (curTok != tok_other || lexer->getOtherChar() != '('){return logErrorP("Expected (");}
 
         auto argNames = std::vector<std::string>();
         while (getNextToken() == tok_identifier){
             argNames.push_back(lexer->getIdentifier());
         }
+        if (curTok != tok_other || lexer->getOtherChar() != ')'){return logErrorP("Expected )");};
         getNextToken(); // eat )
-        return std::make_unique<PrototypeAST>(fname, std::move(argNames));
+
+        return std::make_unique<PrototypeAST>(name, std::move(argNames), isOperator, precedence);
     }
 
     std::unique_ptr<FunctionAST> Parser::parseDefinition()

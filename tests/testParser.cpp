@@ -100,6 +100,49 @@ TEST (parser, function_definition){
     ASSERT_EQ(program.ppformat(), expected);
 }
 
+TEST (parser, opperator_definition){
+    auto data = R""""(
+                def binary % 10(v1 v2)
+                (v1 * v2) * (v1 - v2);
+                def unary - (v)
+                0 - v;
+                )"""";
+    auto expected =
+            R""""(Function(
+    Prototype(binary% 10(
+        v1
+        v2
+    )
+    BinaryExpr(
+        BinaryExpr(
+            VariableExpr(v1)
+            *
+            VariableExpr(v2)
+        )
+        *
+        BinaryExpr(
+            VariableExpr(v1)
+            -
+            VariableExpr(v2)
+        )
+    )
+)
+Function(
+    Prototype(unary- 0(
+        v
+    )
+    BinaryExpr(
+        NumberExpr(0)
+        -
+        VariableExpr(v)
+    )
+)
+)"""";
+    auto program = ckalei::Program(data);
+    std::cout << program.ppformat();
+    ASSERT_EQ(program.ppformat(), expected);
+}
+
 TEST (parser, externdef){
     auto data = R""""(
                 extern mult(v1 v2)
