@@ -176,13 +176,13 @@ namespace ckalei {
         const std::string &getName() const {return name;}
         const std::vector<std::string> &getArgs() const {return args;}
         bool isOperatorProto() const{return isOperator;}
-        unsigned int getPrecedence() const{return precedence;}
+        int getPrecedence() const{return precedence;}
 
     private:
         std::string name;
         std::vector<std::string> args;
         bool isOperator;
-        unsigned precedence; // precedence if a binary op.
+        int precedence; // precedence if a binary op.
     };
 
     /// Node representing a function declaration

@@ -103,9 +103,10 @@ TEST (parser, function_definition){
 TEST (parser, opperator_definition){
     auto data = R""""(
                 def binary % 10(v1 v2)
-                (v1 * v2) * (v1 - v2);
+                    (v1 * v2) * (v1 - v2);
                 def unary - (v)
-                0 - v;
+                    0 - v;
+                1 % 2;
                 )"""";
     auto expected =
             R""""(Function(
@@ -135,6 +136,15 @@ Function(
         NumberExpr(0)
         -
         VariableExpr(v)
+    )
+)
+Function(
+    Prototype(__anon_expr(
+    )
+    BinaryExpr(
+        NumberExpr(1)
+        %
+        NumberExpr(2)
     )
 )
 )"""";

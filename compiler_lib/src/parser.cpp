@@ -236,19 +236,22 @@ namespace ckalei {
             getNextToken(); // eat binary
             if (curTok != tok_other){return logErrorP("expected operator");}
             name = "binary";
-            name.push_back((char) lexer->getOtherChar());
+            char op = (char) lexer->getOtherChar();
+            name.push_back(op);
             isOperator = true;
             getNextToken(); // eat operator name
             if (curTok != tok_number){return logErrorP("Expected precedence");}
             if (lexer->getNumVal() < 1){return logErrorP("Precedence must be > 1");}
-            precedence = (unsigned) lexer->getNumVal();
+            precedence = (int) lexer->getNumVal();
             getNextToken(); // eat precedence val
             kind = ProtoKind::binary;
+            binopPrec[op] = precedence;
         } else if (curTok == tok_unary){ // Parse unary operator declaration
             getNextToken(); // eat unary
             if (curTok != tok_other){return logErrorP("expected operator");}
+            char op = (char) lexer->getOtherChar();
             name = "unary";
-            name.push_back((char) lexer->getOtherChar());
+            name.push_back(op);
             isOperator = true;
             getNextToken(); // eat operator name
             kind = ProtoKind::unary;
