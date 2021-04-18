@@ -246,3 +246,13 @@ TEST (jit, variableAssigment){
     auto res = *program.evaluate();
     testVectorEqual(expected, res);
 }
+
+TEST (jit, div){
+    auto data = R""""(
+        4 / 2
+    )"""";
+    std::vector<double> expected{2};
+    auto program = ckalei::Program(data);
+    auto res = *program.evaluate();
+    testVectorEqual(expected, res);
+}

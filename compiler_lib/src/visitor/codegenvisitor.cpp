@@ -78,6 +78,9 @@ namespace ckalei{
             case '*':
                 lastValue = builder->CreateFMul(lv, rv, "multmp");
                 return;
+            case '/':
+                lastValue = builder->CreateFDiv(lv, rv, "divtmp");
+                return;
             case '<':
                 lv = builder->CreateFCmpULT(lv, rv, "cmptmp");
                 // convert bool 0/1 to double 0.0 or 1.0

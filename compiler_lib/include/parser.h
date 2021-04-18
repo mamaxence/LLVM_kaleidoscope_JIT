@@ -25,6 +25,7 @@ namespace ckalei {
             binopPrec['+'] = 20;
             binopPrec['-'] = 20;
             binopPrec['*'] = 40;
+            binopPrec['/'] = 40;
             binopPrec['='] = 2;
         }
 
