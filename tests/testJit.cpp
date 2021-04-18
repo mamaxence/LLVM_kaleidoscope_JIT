@@ -45,6 +45,8 @@ TEST (jit, function_call){
     std::vector<double> expected{12};
 
     auto program = ckalei::Program(data);
+    std::cerr << program.ppformat();
+    std::cerr << program.getAssembly();
     auto res = *program.evaluate();
     testVectorEqual(expected, res);
 }
@@ -123,11 +125,12 @@ TEST (jit, if_in_if){
 
 TEST (jit, for){
     auto data = R""""(
+    def binary : 1 (x y) y;
     def foo(x y z)
-        for i = x, i < y, 1 in z + 1
+        (for i = x, i < y, 1 in z = z + i): z
     foo(1 10 2)
 )"""";
-    std::vector<double> expected{0.0}; // TODO improve when go variable initialisation
+    std::vector<double> expected{47};
 
     auto program = ckalei::Program(data);
     auto res = *program.evaluate();
@@ -193,6 +196,19 @@ TEST (jit, rec_fib){
         fib(10)
     )"""";
     std::vector<double> expected{2, 3, 5, 55};
+    auto program = ckalei::Program(data);
+    auto res = *program.evaluate();
+    testVectorEqual(expected, res);
+}
+
+TEST (jit, mutable_var){
+    auto data = R""""(
+        def binary : 1 (x y) y;
+        def foo(x y)
+            x = y * x + 1: x
+        foo(2 3)
+        )"""";
+    std::vector<double> expected{7};
     auto program = ckalei::Program(data);
     auto res = *program.evaluate();
     testVectorEqual(expected, res);

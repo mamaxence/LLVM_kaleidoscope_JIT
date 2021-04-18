@@ -20,6 +20,7 @@
 #include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/GVN.h"
+#include "llvm/Transforms/Utils.h"
 
 #include "ast.h"
 #include "KaleidoscopeJIT.h"
@@ -94,6 +95,12 @@ namespace ckalei{
         /// Search for the Function IR for the given name. First search in the current module, then in the declared
         /// functionProto map. It not found, return nullptr.
         llvm::Function *getFunction(const std::string& name);
+        /// Create an alloca instruction in the entry block of the function.
+        /// Used for mutable variables
+        llvm::AllocaInst *createEntryBlockAlloca(llvm::Function *function, const std::string &varName){
+            llvm::IRBuilder<> tmpBuilder(&function->getEntryBlock(), function->getEntryBlock().begin());
+            return tmpBuilder.CreateAlloca(llvm::Type::getDoubleTy(*context), nullptr, varName);
+        }
 
         /// Log an error durring code creation
         llvm::Value* logErrorV(const char* str){
@@ -111,7 +118,7 @@ namespace ckalei{
         std::unique_ptr<llvm::LLVMContext> context;
         std::unique_ptr<llvm::IRBuilder<>> builder;
         std::unique_ptr<llvm::Module> module;
-        std::map<llvm::StringRef, llvm::Value *> namedValues; // Contain reference to named values in context
+        std::map<llvm::StringRef, llvm::AllocaInst *> namedValues; // Contain reference to named values in context
         std::map<std::string, std::unique_ptr<PrototypeAST>> functionProtos;
 
         std::unique_ptr<llvm::legacy::FunctionPassManager> passManager;

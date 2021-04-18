@@ -32,15 +32,33 @@ namespace ckalei{
 
     void CodeGenVisitor::visit(VariableExprAST &node)
     {
-        llvm::Value *v = namedValues[node.getName()];
-        if (!v){
+        llvm::Value *varAddress = namedValues[node.getName()];
+        if (!varAddress){
             lastValue = logErrorV("Unknown variable name");
         }
-        lastValue = v;
+        // load value from stack
+        lastValue = builder->CreateLoad(varAddress, node.getName());
     }
 
     void CodeGenVisitor::visit(BinaryExprAST &node)
     {
+        // special case for var assingment
+        if (node.getOp() == '='){
+            // ensure leftvalue is a var
+            auto* lhse = dynamic_cast<VariableExprAST*>(node.getLeftExpr().get());
+            if (!lhse){
+                lastValue = logErrorV("destination of '=' must be a variable");
+                return;
+            }
+            // codegen the rhs
+            node.getRightExpr()->accept(*this); if (!lastValue){ return;}
+            auto rv = lastValue;
+            llvm::Value *variable = namedValues[lhse->getName()];
+            if (!variable){lastValue = logErrorV("Unknown variable name"); return;}
+            builder->CreateStore(rv, variable);
+            lastValue = rv;
+            return;
+        }
         // Get left and right values
         node.getLeftExpr()->accept(*this);
         auto lv = lastValue;
@@ -161,21 +179,21 @@ namespace ckalei{
 
     void CodeGenVisitor::visit(ForExprAST &node)
     {
+        llvm::Function *function = builder->GetInsertBlock()->getParent();
+        llvm::AllocaInst *alloca = createEntryBlockAlloca(function, node.getVarName());
+
         node.getStart()->accept(*this);
         if (! lastValue){return;}
         auto startVal = lastValue;
+        builder->CreateStore(startVal, alloca);
 
-        llvm::Function *function = builder->GetInsertBlock()->getParent();
-        llvm::BasicBlock *PreheaderBB = builder->GetInsertBlock();
         llvm::BasicBlock *loopBB = llvm::BasicBlock::Create(*context, "loop", function);
         builder->CreateBr(loopBB);
 
         // Create body
         builder->SetInsertPoint(loopBB);
-        llvm::PHINode* variable = builder->CreatePHI(llvm::Type::getDoubleTy(*context), 2, node.getVarName());
-        variable->addIncoming(startVal, PreheaderBB);
-        llvm::Value* oldVar = namedValues[node.getVarName()]; // Save old var for restoration add set new var in context
-        namedValues[node.getVarName()] = variable;
+        llvm::AllocaInst* oldVar = namedValues[node.getVarName()]; // Save old var for restoration add set new var in context
+        namedValues[node.getVarName()] = alloca;
 
         node.getBody()->accept(*this); // create body code
         if (! lastValue){return;}
@@ -183,19 +201,19 @@ namespace ckalei{
         if (! lastValue){return;}
         auto stepVal = lastValue;
 
+        /// Compute next value and store it
+        llvm::Value *variable = builder->CreateLoad(alloca);
         llvm::Value *nextVar = builder->CreateFAdd(variable, stepVal, "nextvar");
+        builder->CreateStore(nextVar, alloca);
         node.getEnd()->accept(*this); // compute end value
         if (! lastValue){return;}
         auto endCond = lastValue;
         endCond = builder->CreateFCmpONE(endCond, llvm::ConstantFP::get(*context, llvm::APFloat(0.0)), "loopcond");
 
-        llvm::BasicBlock *loopEndBB = builder->GetInsertBlock();
         llvm::BasicBlock *afterBB = llvm::BasicBlock::Create(*context, "afterloop", function);
 
         builder->CreateCondBr(endCond, loopBB, afterBB);
         builder->SetInsertPoint(afterBB);
-
-        variable->addIncoming(nextVar, loopEndBB);
 
         // restore shadowed variable
         if (oldVar){
@@ -249,7 +267,9 @@ namespace ckalei{
         // Create a nue named value table containing functions args
         namedValues.clear();
         for (int i=0; i<function->arg_size(); i++){
-            namedValues[node.getProto()->getArgs()[i]] = function->getArg(i);
+            auto alloca = createEntryBlockAlloca(function, node.getProto()->getArgs()[i]);
+            builder->CreateStore(function->getArg(i), alloca);
+            namedValues[node.getProto()->getArgs()[i]] = alloca;
         }
 
         node.getBody()->accept(*this);
@@ -313,6 +333,7 @@ namespace ckalei{
         builder = std::make_unique<llvm::IRBuilder<>>(*context);
 
         passManager = std::make_unique<llvm::legacy::FunctionPassManager>(module.get());
+        passManager->add(llvm::createPromoteMemoryToRegisterPass());
         passManager->add(llvm::createInstructionCombiningPass());
         passManager->add(llvm::createReassociatePass());
         passManager->add(llvm::createGVNPass());
