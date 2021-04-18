@@ -1,17 +1,26 @@
 #include <iostream>
-#include "lexer.h"
 
 #include "program.h"
 
 int main()
 {
-    auto data = R""""(
-                def mult(a b) a*b;
-                mult(3 4);
-                mult(4 5);
-                )"""";
-    std::vector<double> expected{12, 20};
-
-    auto program = ckalei::Program(data);
+    auto code = R""""(
+        def binary : 1 (x y) y;
+        def fib(x)
+            var a = 1, b = 1, c in
+            (for i = 2, i < x, 1 in
+                c = a + b:
+                a = b:
+                b  = c):
+            b;
+        fib(3)
+        fib(4)
+        fib(5)
+        fib(10)
+    )"""";
+    auto program = ckalei::Program(code);
     auto res = *program.evaluate();
+    for (const auto &v :res){
+        std::cout << v << "\n";
+    }
 }
