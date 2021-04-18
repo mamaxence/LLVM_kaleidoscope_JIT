@@ -201,6 +201,27 @@ TEST (jit, rec_fib){
     testVectorEqual(expected, res);
 }
 
+TEST (jit, ite_fib){
+    auto data = R""""(
+        def binary : 1 (x y) y;
+        def fib(x)
+            var a = 1, b = 1, c in
+            (for i = 2, i < x, 1 in
+                c = a + b:
+                a = b:
+                b  = c):
+            b;
+        fib(3)
+        fib(4)
+        fib(5)
+        fib(10)
+    )"""";
+    std::vector<double> expected{2, 3, 5, 55};
+    auto program = ckalei::Program(data);
+    auto res = *program.evaluate();
+    testVectorEqual(expected, res);
+}
+
 TEST (jit, mutable_var){
     auto data = R""""(
         def binary : 1 (x y) y;
@@ -213,14 +234,15 @@ TEST (jit, mutable_var){
     auto res = *program.evaluate();
     testVectorEqual(expected, res);
 }
-//
-//TEST (jit, variableAssigment){
-//    auto data = R""""(
-//        a = 1;
-//        a
-//    )"""";
-//    std::vector<double> expected{1};
-//    auto program = ckalei::Program(data);
-//    auto res = *program.evaluate();
-//    testVectorEqual(expected, res);
-//}
+
+TEST (jit, variableAssigment){
+    auto data = R""""(
+        def binary : 1 (x y) y;
+        var a = 1, b in
+            b = 2: a+b
+    )"""";
+    std::vector<double> expected{3};
+    auto program = ckalei::Program(data);
+    auto res = *program.evaluate();
+    testVectorEqual(expected, res);
+}

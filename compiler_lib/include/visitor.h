@@ -45,7 +45,7 @@ namespace ckalei{
         virtual void visit(VariableExprAST& node) = 0;
         virtual void visit(UnaryExprAST& node) = 0;
         virtual void visit(BinaryExprAST& node) = 0;
-        virtual void visit(DeclarationExprAST& node) {};
+        virtual void visit(DeclarationExprAST& node) = 0;
         virtual void visit(CallExprAST& node) =  0;
         virtual void visit(IfExprAST& node) = 0;
         virtual void visit(ForExprAST& node) = 0;
@@ -66,6 +66,8 @@ namespace ckalei{
         void visit(BinaryExprAST& node) override;
         /// Generate code for unary expression. Set lastValue.
         void visit(UnaryExprAST& node) override;
+        /// Generate code for variable declaration
+        void visit(DeclarationExprAST& node) override;
         /// Generate code for CallExpr AST. Set lastValue.
         void visit(CallExprAST& node) override;
         /// Generate code for IfThenElse node. Set lastValue
@@ -78,8 +80,8 @@ namespace ckalei{
         void visit(FunctionAST& node) override;
 
     public:
-        /// Return assembly transcript of the astData
-        [[nodiscard]] std::string getAssembly(const std::vector<std::unique_ptr<ASTNode>>& astData);
+        /// Return assembly transcript of the astData. If debug is true, deactivate optimisation pass
+        [[nodiscard]] std::string getAssembly(const std::vector<std::unique_ptr<ASTNode>>& astData, bool debug=false);
         /// Return an evaluation of the current node. Valid only if current node is an expression
         std::unique_ptr<std::vector<double>> evaluate(const std::vector<std::unique_ptr<ASTNode>>& astData);
 
@@ -125,6 +127,7 @@ namespace ckalei{
         std::unique_ptr<std::vector<double>> evaluationRes;
 
         bool jitTopLevel;
+        bool debug;
     };
 
     /// Visitor for producing prety print of ast

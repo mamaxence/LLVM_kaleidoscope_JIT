@@ -1,14 +1,13 @@
 //
 // Created by maxence on 28/03/2021.
 //
-
 #include "visitor.h"
 #include "llvm/Support/Error.h"
 #include "llvm/Support/ErrorHandling.h"
 
 namespace ckalei{
 
-    CodeGenVisitor::CodeGenVisitor(): jitTopLevel(false)
+    CodeGenVisitor::CodeGenVisitor(): jitTopLevel(false), debug(false)
     {
         jit = std::make_unique<llvm::orc::KaleidoscopeJIT>();
         initModuleAndPassManager();
@@ -102,6 +101,36 @@ namespace ckalei{
         assert(f && "binary operator not found");
         llvm::Value *ops[1] = {expr};
         lastValue = builder->CreateCall(f, ops, "binop");
+    }
+
+    void CodeGenVisitor::visit(DeclarationExprAST &node)
+    {
+        std::vector<llvm::AllocaInst *> oldBindings;
+        auto *function = builder->GetInsertBlock()->getParent();
+        for (const auto &val: node.getVars()){
+            auto alloca = createEntryBlockAlloca(function, val.first);
+            llvm::Value* varVal = llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
+            if (val.second){
+                val.second->accept(*this);
+                if (!lastValue){return;}
+                varVal = lastValue;
+            }
+            builder->CreateStore(varVal, alloca);
+            oldBindings.push_back(namedValues[val.first]);
+            namedValues[val.first] = alloca;
+        }
+        node.getBody()->accept(*this);
+        if (!lastValue){return;}
+        auto bodyVal = lastValue;
+
+        namedValues.clear();
+        for (const auto &alloca: oldBindings){
+            if (alloca){
+                namedValues[alloca->getName()] = alloca;
+            }
+        }
+
+        lastValue = bodyVal;
     }
 
     void CodeGenVisitor::visit(CallExprAST &node)
@@ -331,18 +360,22 @@ namespace ckalei{
         module = std::make_unique<llvm::Module>("jit", *context);
         module->setDataLayout(jit->getTargetMachine().createDataLayout());
         builder = std::make_unique<llvm::IRBuilder<>>(*context);
-
         passManager = std::make_unique<llvm::legacy::FunctionPassManager>(module.get());
-        passManager->add(llvm::createPromoteMemoryToRegisterPass());
-        passManager->add(llvm::createInstructionCombiningPass());
-        passManager->add(llvm::createReassociatePass());
-        passManager->add(llvm::createGVNPass());
-        passManager->add(llvm::createCFGSimplificationPass());
+        if (!debug){
+            passManager->add(llvm::createPromoteMemoryToRegisterPass());
+            passManager->add(llvm::createInstructionCombiningPass());
+            passManager->add(llvm::createReassociatePass());
+            passManager->add(llvm::createGVNPass());
+            passManager->add(llvm::createCFGSimplificationPass());
+        }
         passManager->doInitialization();
     }
 
-    std::string CodeGenVisitor::getAssembly(const std::vector<std::unique_ptr<ASTNode>> &astData)
+    std::string CodeGenVisitor::getAssembly(const std::vector<std::unique_ptr<ASTNode>> &astData, bool debug)
     {
+        if (debug){
+            this->debug = true;
+        }
         std::string res;
         for (auto const& node: astData){
             if (node != nullptr){
@@ -350,6 +383,7 @@ namespace ckalei{
                 res += ppformat();
             }
         }
+        this->debug = false;
         return res;
     }
 
@@ -379,5 +413,4 @@ namespace ckalei{
 
         return nullptr;
     }
-
 }

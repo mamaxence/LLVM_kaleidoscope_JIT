@@ -45,10 +45,10 @@ namespace ckalei{
         }
 
         /// Return a string containing assembly representation of the ast
-        [[nodiscard]] std::string getAssembly() const
+        [[nodiscard]] std::string getAssembly(bool debug=false) const
         {
             auto compiler = CodeGenVisitor();
-            return compiler.getAssembly(astData);
+            return compiler.getAssembly(astData, debug);
         }
 
         /// Return a list of double containing the evaluation of the program
