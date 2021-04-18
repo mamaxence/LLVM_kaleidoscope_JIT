@@ -53,7 +53,7 @@ void assertTok(ckalei::Lexer &lexer, ckalei::Token tok){
 
 TEST (lexer, simple){
     auto data = R""""(def id=1.2
-            # coment
+            # comment
             extern val
             )"""";
     auto lexer = ckalei::Lexer(data);
