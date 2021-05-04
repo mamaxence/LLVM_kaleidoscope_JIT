@@ -14,11 +14,11 @@ Kaleidoscope language support:
 # Simple binary operation
 1 + 2 - 3 * 4 / 5
 
-# Function definition
+# Function definitions
 def foo(x)
     x + 1
     
-# If then else operation
+# If then else
 if (x>1) then
    1
 else
@@ -50,4 +50,4 @@ extern cos(x)
 cos(1)
 ```
 
-All types are considered to by doubles.
+All types are considered to be doubles.
